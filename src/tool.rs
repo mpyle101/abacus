@@ -7,6 +7,7 @@ use crate::config::*;
 use crate::{plan, plan::InputSide};
 
 #[derive(Clone, Debug)]
+#[allow(unused)]
 pub struct Tool {
     id: String,
     action: Action,

@@ -13,6 +13,7 @@ use crate::tool::{Tool, ToolData};
 type WorkflowGraph = Graph<Tool, InputSide>;
 
 #[derive(Debug)]
+#[allow(unused)]
 pub struct Workflow {
     id: String,
     name: String,
