@@ -1,0 +1,81 @@
+[
+    {
+        "id": "978-0641723445",
+        "cat": "book",
+        "name": "The Lightning Thief",
+        "author": "Rick Riordan",
+        "series": "Percy Jackson and the Olympians",
+        "sequence": 1,
+        "genre": "fantasy",
+        "inStock": true,
+        "price": 12.50,
+        "pages": 384
+    },
+    {
+        "id": "978-1423103349",
+        "cat": "paperback",
+        "name": "The Sea of Monsters",
+        "author": "Rick Riordan",
+        "series": "Percy Jackson and the Olympians",
+        "sequence": 2,
+        "genre": "fantasy",
+        "inStock": true,
+        "price": 6.49,
+        "pages": 304
+    },
+    {
+        "id": "978-1857995879",
+        "cat": "paperback",
+        "name": "Sophie's World : The Greek Philosophers",
+        "author": "Jostein Gaarder",
+        "sequence": 1,
+        "genre": "fantasy",
+        "inStock": true,
+        "price": 3.07,
+        "pages": 64
+    },
+    {
+        "id": "978-1923988177",
+        "cat": "paperback",
+        "name": "Lucene in Action, Second Edition",
+        "author": "Michael McCandless",
+        "sequence": 1,
+        "genre": "IT",
+        "inStock": true,
+        "price": 30.50,
+        "pages": 475
+    },
+    {
+        "id": "978-1933988077",
+        "cat": "paperback",
+        "name": "Lucene in Action, Second Edition",
+        "author": "Michael McCandless",
+        "sequence": 1,
+        "genre": "IT",
+        "inStock": true,
+        "price": 30.50,
+        "pages": 475
+    },
+    {
+        "id": "968-1933988177",
+        "cat": "paperback",
+        "name": "Lucene in Action, Second Edition",
+        "author": "Michael McCandless",
+        "sequence": 1,
+        "genre": "IT",
+        "inStock": true,
+        "price": 30.50,
+        "pages": 475
+    },
+    {
+        "id": "978-2933988077",
+        "cat": "paperback",
+        "name": "Lucene in Action, Second Edition",
+        "author": "Michael McCandless",
+        "sequence": 1,
+        "genre": "IT",
+        "inStock": true,
+        "price": 30.50,
+        "pages": 475
+    }
+]

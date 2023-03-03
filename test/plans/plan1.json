@@ -1,0 +1,41 @@
+{
+    "name": "jester",
+    "tools": [
+        { "id": "01", "tool": "join", "type": "inner", "lt": ["a1", "b1"], "rt": ["a2", "b2"] },
+        { "id": "02", "tool": "input", "format": "csv", "path": "./example.csv", "query": "SELECT a, MIN(b) FROM example GROUP BY a LIMIT 100" },
+        { "id": "03", "tool": "project", "expr": [
+            {"add": [{"col": "a"}, {"col": "b"}, {"num": 2.5}], "alias": "d"},
+            {"col": "c"}
+        ]},
+        { "id": "04", "tool": "aggregate", "group_by": ["a"], "expr": [{"min":"b"}]},
+        { "id": "05", "tool": "merge", "distinct": true },
+        { "id": "07", "tool": "sort", "cols": [
+            { "col": "a", "asc": true },
+            { "col": "b", "asc": false, "nulls_first": true }
+        ]},
+        { "id": "08", "tool": "filter", "expr": {"and": [
+            {"lte":[{"col": "a"}, {"col": "b"}]},
+            {"gt":[{"col": "a"}, {"num": 42}]}
+        ]}},
+        { "id": "09", "tool": "select", "cols": ["a", "b"] },
+        { "id": "10", "tool": "intersect", "cols": ["b", "c"] },
+        { "id": "11", "tool": "input", "format": "csv", "path": "./example.csv", "query": "SELECT *", "distinct": true },
+        { "id": "12", "tool": "input", "format": "avro", "path": "./example.avro", "query": "*", "limit": 100 },
+        { "id": "13", "tool": "output", "format": "parquet", "path": "./example.parquet" },
+        { "id": "14", "tool": "append", "cols": [
+            {"name": "ab_mul", "expr": {"mul":[{"col": "a"}, {"col": "b"}]}}
+        ]}
+    ],
+    "links": [
+        { "src": "02", "dst": "01" },
+        { "src": "12", "dst": "01" },
+        { "src": "01", "dst": "03" },
+        { "src": "11", "dst": "05" },
+        { "src": "03", "dst": "05" },
+        { "src": "05", "dst": "08" },
+        { "str": "08", "dst": "09" },
+        { "str": "09", "dst": "07" },
+        { "str": "07", "dst": "13" }
+    ]
+}
+

@@ -1,0 +1,15 @@
+{
+    "id": "01",
+    "name": "joiner",
+    "tools": [
+        { "id": "01", "tool": "input", "format": "csv", "path": "./test/data/csv/cars1.csv" },
+        { "id": "02", "tool": "input", "format": "csv", "path": "./test/data/csv/cars2.csv" },
+        { "id": "03", "tool": "join", "type": "inner", "lt": ["Car1"], "rt": ["Car2"] },
+        { "id": "04", "tool": "output", "format": "csv", "path": "./output.csv" }
+    ],
+    "links": [
+        { "src": "01", "dst": "03", "input": "left" },
+        { "src": "02", "dst": "03", "input": "right" },
+        { "src": "03", "dst": "04" }
+    ]
+}

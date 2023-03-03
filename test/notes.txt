@@ -1,0 +1,48 @@
+JSON
+mode: design (limit 1), preview (limit 100), full
+input tool: type => file, s3, hdfs, bigquery, azure
+
+Operators
+distinct
+intersect: 2 dataframes
+append: list of named expressions
+merge (union): 2 dataframes (distinct flag)
+except: (differences): 2 dataframes
+sort: expression
+filter: expression
+aggregate: expression, optional grouping expression
+limit: usize (skip)
+join: type, left/right column sets
+project (select): list of expressions
+select (select_columns): columns
+input (read): path, type, optional query (ctx.sql) -> sql statement
+
+Evaluators
+count
+collect
+write
+
+Expressions:
+and
+or
+not
+mod (modulus)
+like
+not_like
+alias
+in_list (in)
+is_null
+is_not_null
+sort
+
+Expression traits:
+add
+div
+hash
+sub
+mul
+not
+rem (remainder)
+
+Expression functions (a bunch)
+https://docs.rs/datafusion-expr/8.0.0/src/datafusion_expr/expr_fn.rs.html

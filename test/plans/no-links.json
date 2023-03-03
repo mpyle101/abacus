@@ -1,0 +1,23 @@
+{
+    "name": "jester",
+    "tools": [
+        { "id": "01", "tool": "join", "cols": [["a1", "b1"], ["a2", "b2"]] },
+        { "id": "02", "tool": "query", "query": "SELECT a, MIN(b) FROM example GROUP BY a LIMIT 100" },
+        { "id": "03", "tool": "limit", "limit": 100 },
+        { "id": "04", "tool": "project", "expr": ["[a] + [b]", "[c]"] },
+        { "id": "05", "tool": "union", "expr": ["[a] + [b]", "[c]"] },
+        { "id": "06", "tool": "union" },
+        { "id": "07", "tool": "sort", "cols": [
+            { "col": "a", "asc": true },
+            { "col": "b", "asc": false, "nulls_first": false }
+        ] },
+        { "id": "08", "tool": "filter", "expr": { "and": [{"lte": ["a", "b"]}, {"gt": ["a", 42]}] } },
+        { "id": "09", "tool": "select", "expr": { "min": "b" }, "group": ["a"] },
+        { "id": "10", "tool": "intersect", "expr": ["[a] + [b]", "[c]"] },
+        { "id": "11", "tool": "input", "format": "csv", "path": "tests/example.csv", "query": "SELECT *" },
+        { "id": "12", "tool": "input", "format": "avro", "path": "tests/example.avro", "query": "*" },
+        { "id": "13", "tool": "output", "format": "parquet", "path": "tests/example.parquet" },
+        { "id": "14", "tool": "browse" }
+    ]
+}
+

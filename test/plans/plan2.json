@@ -1,0 +1,74 @@
+{
+    "name": "jester",
+    "tools": [
+        {
+            "id": "01",
+            "tool": "input",
+            "format": "csv",
+            "path": "./customers.csv",
+            "query": "SELECT CustomerID, Address, City",
+            "limit": 100,
+            "skip": 20
+        },
+        {
+            "id": "05",
+            "tool": "input",
+            "format": "csv",
+            "path": "./customers.csv",
+            "cols": [
+                "customer_id",
+                "store_number",
+                "responder",
+                "first_name",
+                "last_name",
+                "city"
+            ],
+            "delimiter": ",",
+            "schema": [
+                { "field": "customer_id", "type": "str" },
+                { "field": "store_number", "type": "num" },
+                { "field": "responder", "type": "bool" },
+                { "field": "first_name", "type": "str" },
+                { "field": "last_name", "type": "str" },
+                { "field": "address", "type": "str" },
+                { "field": "city", "type": "str" },
+                { "field": "state", "type": "str" },
+                { "field": "zip", "type": "str" }
+            ]
+        },
+        {
+            "id": "06",
+            "tool": "input",
+            "format": "csv",
+            "path": "./customers.csv",
+            "distinct": true,
+            "infer_schema": true
+        },
+        {
+            "id": "02",
+            "tool": "filter",
+            "expr": {"and": [
+                {"ne":[{"col":"City"}, {"str":"Denver"}]},
+                {"eq":[{"col":"Responder"}, {"str":"Yes"}]}
+            ]}
+        },
+        {
+            "id": "03",
+            "tool": "sort",
+            "cols": [{ "col": "store_number", "asc": true, "nulls_first": false }]
+        },
+        {
+            "id": "04",
+            "tool": "output",
+            "format": "csv",
+            "path": "./output.csv",
+            "limit": 100,
+            "distinct": true
+        }
+    ],
+    "links": [
+        { "src": "01", "dst": "02" },
+        { "src": "02", "dst": "03" },
+        { "src": "03", "dst": "04" }
+    ]
+}
