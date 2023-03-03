@@ -3,6 +3,8 @@ use std::error::Error;
 
 use datafusion::dataframe::DataFrame;
 use datafusion::error::Result;
+use datafusion::execution::context::SessionContext;
+
 use petgraph::visit::EdgeRef;
 use petgraph::graph::{Graph, NodeIndex};
 use tokio::task::JoinSet;
@@ -64,15 +66,22 @@ impl Workflow {
         while !ready.is_empty() {
             println!("{:?}", ready);
 
-            let mut set = JoinSet::new();
-            let mut _handles = Vec::with_capacity(ready.len());
+            let mut results = vec![];
+            let mut async_tools = JoinSet::new();
             while let Some(ix) = ready.pop_front() {
                 let data = dfs.remove(&ix);
-                let handle = set.spawn(run_tool(ix, self.tools[ix].clone(), data));
-                _handles.push(handle);
+                if self.tools[ix].is_async() {
+                    let ctx = SessionContext::new();
+                    async_tools.spawn(run_async(ix, ctx, self.tools[ix].clone(), data));
+                } else {
+                    results.push((ix, self.tools[ix].run_sync(data)?))
+                }
             }
-            while let Some(res) = set.join_next().await {
-                let (ix, opt) = res.unwrap().unwrap();
+            while let Some(res) = async_tools.join_next().await {
+                results.push(res.unwrap().unwrap());
+            }
+
+            for (ix, opt) in results {
                 if let Some(df) = opt {
                     self.tools.edges(ix)
                         .map(|edge| (edge.target(), *edge.weight()))
@@ -92,8 +101,8 @@ impl Workflow {
 
 }
 
-async fn run_tool(ix: NodeIndex, tool: Tool, data: Option<ToolData>) -> Result<(NodeIndex, Option<DataFrame>)>
+async fn run_async(ix: NodeIndex, ctx: SessionContext, tool: Tool, data: Option<ToolData>) -> Result<(NodeIndex, Option<DataFrame>)>
 {
-    let res = tool.run(data).await?;
+    let res = tool.run_async(ctx, data).await?;
     Ok((ix, res))
 }

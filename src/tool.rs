@@ -1,4 +1,4 @@
-use datafusion::dataframe::DataFrame;
+use datafusion::prelude::{col, DataFrame};
 use datafusion::error::Result;
 use datafusion::execution::context::SessionContext;
 use datafusion::execution::options::{AvroReadOptions, CsvReadOptions, ParquetReadOptions};
@@ -20,7 +20,8 @@ impl Tool {
 
         let id = plan.id();
         let action = match plan {
-            join(conf) => Action::Join(JoinConfig::new(conf)),
+            join(conf)   => Action::Join(JoinConfig::new(conf)),
+            select(conf) => Action::Select(SelectConfig::new(conf)),
             input(format) => match format {
                 Input::csv(conf)     => Action::InputCsv(CsvInputConfig::new(&conf.path)),
                 Input::avro(conf)    => Action::InputAvro(AvroInputConfig::new(&conf.path)),
@@ -35,6 +36,11 @@ impl Tool {
         Tool { id, action }
     }
 
+    pub fn is_async(&self) -> bool
+    {
+        self.action.is_async()
+    }
+
     pub fn is_ready(&self, data: &ToolData) -> bool
     {
         let needed = self.action.frames();
@@ -44,10 +50,14 @@ impl Tool {
         needed == 2 && data.left.is_some() && data.right.is_some()
     }
 
-    pub async fn run(&self, data: Option<ToolData>) -> Result<Option<DataFrame>>
+    pub fn run_sync(&self, data: Option<ToolData>) -> Result<Option<DataFrame>>
     {
-        let ctx = SessionContext::new();
-        self.action.run(&ctx, data).await
+        self.action.run_sync(data)
+    }
+
+    pub async fn run_async(&self, ctx: SessionContext, data: Option<ToolData>) -> Result<Option<DataFrame>>
+    {
+        self.action.run_async(ctx, data).await
     }
 }
 
@@ -70,6 +80,7 @@ impl ToolData {
 pub enum Action {
     // Data
     Join(JoinConfig),
+    Select(SelectConfig),
 
     // Input
     InputCsv(CsvInputConfig),
@@ -93,7 +104,18 @@ impl Action {
         }
     }
 
-    async fn run(&self, ctx: &SessionContext, data: Option<ToolData>) -> Result<Option<DataFrame>>
+    fn is_async(&self) -> bool
+    {
+        use Action::*;
+
+        match self {
+            Join(_) | Select(_) => false,
+            InputCsv(_) | InputAvro(_) | InputParquet(_) => true,
+            OutputCsv(_) | OutputParquet(_) => true
+        }
+    }
+
+    async fn run_async(&self, ctx: SessionContext, data: Option<ToolData>) -> Result<Option<DataFrame>>
     {
         use Action::*;
 
@@ -115,19 +137,6 @@ impl Action {
 
         let mut data = data.unwrap();
         match self {
-            Join(conf) => {
-                let left  = data.left.take().unwrap();
-                let right = data.right.take().unwrap();
-                let lt_cols = conf.left_cols.iter()
-                    .map(|c| c.as_ref())
-                    .collect::<Vec<_>>();
-                let rt_cols = conf.right_cols.iter()
-                    .map(|c| c.as_ref())
-                    .collect::<Vec<_>>();
-                let frame = left.join(right, conf.join_type, &lt_cols, &rt_cols, None)?;
-
-                Ok(Some(frame))
-            },
             OutputCsv(conf) => {
                 let plan = data.left.take().unwrap().create_physical_plan().await?;
                 ctx.write_csv(plan, conf.path.clone()).await?;
@@ -138,7 +147,42 @@ impl Action {
                 ctx.write_parquet(plan, conf.path.clone(), None).await?;
                 Ok(None)
             },
-            _ => unreachable!()
+            _ => panic!("Sync tool running async")
+        }
+    }
+
+    fn run_sync(&self, data: Option<ToolData>) -> Result<Option<DataFrame>>
+    {
+        use Action::*;
+
+        let mut data = data.unwrap();
+        match self {
+            Join(conf) => {
+                let left  = data.left.take().unwrap();
+                let right = data.right.take().unwrap();
+                let lt_cols = conf.left_cols.iter()
+                    .map(|c| c.as_ref())
+                    .collect::<Vec<_>>();
+                let rt_cols = conf.right_cols.iter()
+                    .map(|c| c.as_ref())
+                    .collect::<Vec<_>>();
+                let frame = left.join(right, conf.join_type, &lt_cols, &rt_cols, None)?;
+                Ok(Some(frame))
+            },
+            Select(conf) => {
+                let df = data.left.take().unwrap();
+                let exprs = conf.columns.iter()
+                    .map(|c| if let Some(alias) = conf.aliases.get(c) {
+                            col(c).alias(alias)
+                        } else {
+                            col(c)
+                        }
+                    )
+                    .collect::<Vec<_>>();
+                let frame = df.select(exprs)?;
+                Ok(Some(frame))
+            },
+            _ => panic!("Async tool running sync")
         }
     }
 

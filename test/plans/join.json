@@ -2,14 +2,26 @@
     "id": "01",
     "name": "joiner",
     "tools": [
-        { "id": "01", "tool": "input", "format": "csv", "path": "./test/data/csv/cars1.csv" },
-        { "id": "02", "tool": "input", "format": "csv", "path": "./test/data/csv/cars2.csv" },
-        { "id": "03", "tool": "join", "type": "inner", "lt": ["Car1"], "rt": ["Car2"] },
-        { "id": "04", "tool": "output", "format": "csv", "path": "./output" }
+        { "id": "01", "tool": "input", "format": "csv", "path": "./test/data/csv/cars.csv" },
+        { "id": "02", "tool": "input", "format": "csv", "path": "./test/data/csv/cars.csv" },
+        { 
+            "id": "03", "tool": "select",
+            "columns": ["Car", "MPG", "Cylinders", "Displacement", "Horsepower"],
+            "aliases": {"Car": "Car(L)"}
+        },
+        { 
+            "id": "04", "tool": "select",
+            "columns": ["Car", "Weight", "Acceleration", "Model", "Origin"],
+            "aliases": {"Car": "Car(R)"}
+        },
+        { "id": "05", "tool": "join", "type": "inner", "lt": ["Car(L)"], "rt": ["Car(R)"] },
+        { "id": "06", "tool": "output", "format": "csv", "path": "./output" }
     ],
     "links": [
-        { "src": "01", "dst": "03", "input": "left" },
-        { "src": "02", "dst": "03", "input": "right" },
-        { "src": "03", "dst": "04" }
+        { "src": "01", "dst": "03" },
+        { "src": "02", "dst": "04" },
+        { "src": "03", "dst": "05", "input": "left" },
+        { "src": "04", "dst": "05", "input": "right" },
+        { "src": "05", "dst": "06" }
     ]
 }

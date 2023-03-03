@@ -34,10 +34,7 @@ async fn main()
     let wf = Workflow::new(&plan);
     if args.debug > 0 { println!("{:?}", wf); }
 
-    match wf.run().await {
-        Ok(_) => {},
-        Err(e) => println!("{:?}", e)
-    }
+    wf.run().await.unwrap()
 }
 
 fn read_plan<P>(path: P) -> Result<plan::Plan, Box<dyn Error>>

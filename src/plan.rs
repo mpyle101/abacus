@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
@@ -34,6 +35,7 @@ pub enum Tool {
     input(Input),
     output(Output),
     join(Join),
+    select(Select),
 }
 
 impl Tool {
@@ -45,6 +47,7 @@ impl Tool {
             input(tool)  => tool.id(),
             output(tool) => tool.id(),
             join(tool)   => tool.id.clone(),
+            select(tool) => tool.id.clone(),
         }
     }
 }
@@ -142,4 +145,11 @@ pub struct Join {
 
     #[serde(rename(deserialize = "type"))]
     pub variant: JoinType,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+pub struct Select {
+    pub id: String,
+    pub columns: Vec<String>,
+    pub aliases: HashMap<String, String>,
 }

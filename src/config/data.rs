@@ -1,6 +1,7 @@
+use std::collections::HashMap;
 use datafusion::prelude::JoinType;
 
-use crate::plan::{Join, JoinType as ConfigJoinType};
+use crate::plan::{Join, JoinType as ConfigJoinType, Select};
 
 #[derive(Clone, Debug)]
 pub struct JoinConfig {
@@ -25,5 +26,17 @@ impl JoinConfig {
         };
 
         JoinConfig { join_type, left_cols: config.lt.clone(), right_cols: config.rt.clone() }
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct SelectConfig {
+    pub columns: Vec<String>,
+    pub aliases: HashMap<String, String>,
+}
+impl SelectConfig {
+    pub fn new(config: &Select) -> SelectConfig
+    {
+        SelectConfig { aliases: config.aliases.clone(), columns: config.columns.clone() }
     }
 }
