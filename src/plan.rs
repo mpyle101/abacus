@@ -116,12 +116,18 @@ impl Output {
 pub struct OutputCsv {
     pub id: String,
     pub path: String,
+
+    #[serde(default)]
+    pub overwrite: bool,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct OutputParquet {
     pub id: String,
     pub path: String,
+
+    #[serde(default)]
+    pub overwrite: bool,
 }
 
 #[derive(Debug, Deserialize)]

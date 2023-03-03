@@ -1,3 +1,5 @@
+use std::fs;
+
 use datafusion::prelude::{col, DataFrame};
 use datafusion::error::Result;
 use datafusion::execution::context::SessionContext;
@@ -28,8 +30,8 @@ impl Tool {
                 Input::parquet(conf) => Action::InputParquet(ParquetInputConfig::new(&conf.path)),
             },
             output(format) => match format {
-                Output::csv(conf)     => Action::OutputCsv(CsvOutputConfig::new(&conf.path)),
-                Output::parquet(conf) => Action::OutputParquet(ParquetOutputConfig::new(&conf.path)),
+                Output::csv(conf)     => Action::OutputCsv(CsvOutputConfig::new(&conf.path, conf.overwrite)),
+                Output::parquet(conf) => Action::OutputParquet(ParquetOutputConfig::new(&conf.path, conf.overwrite)),
             },
         };
 
@@ -121,15 +123,15 @@ impl Action {
 
         match self {
             InputCsv(conf) => {
-                let df = ctx.read_csv(conf.path.clone(), CsvReadOptions::default()).await?;
+                let df = ctx.read_csv(&conf.path, CsvReadOptions::default()).await?;
                 return Ok(Some(df))
             },
             InputAvro(conf) => {
-                let df = ctx.read_avro(conf.path.clone(), AvroReadOptions::default()).await?;
+                let df = ctx.read_avro(&conf.path, AvroReadOptions::default()).await?;
                 return Ok(Some(df))
             },
             InputParquet(conf) => {
-                let df = ctx.read_parquet(conf.path.clone(), ParquetReadOptions::default()).await?;
+                let df = ctx.read_parquet(&conf.path, ParquetReadOptions::default()).await?;
                 return Ok(Some(df))
             },
             _ => {}
@@ -138,13 +140,19 @@ impl Action {
         let mut data = data.unwrap();
         match self {
             OutputCsv(conf) => {
+                if conf.overwrite {
+                    fs::remove_dir_all(&conf.path);
+                }
                 let plan = data.left.take().unwrap().create_physical_plan().await?;
-                ctx.write_csv(plan, conf.path.clone()).await?;
+                ctx.write_csv(plan, &conf.path).await?;
                 Ok(None)
             },
             OutputParquet(conf) => {
+                if conf.overwrite {
+                    fs::remove_dir_all(&conf.path);
+                }
                 let plan = data.left.take().unwrap().create_physical_plan().await?;
-                ctx.write_parquet(plan, conf.path.clone(), None).await?;
+                ctx.write_parquet(plan, &conf.path, None).await?;
                 Ok(None)
             },
             _ => panic!("Sync tool running async")

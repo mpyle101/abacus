@@ -15,7 +15,7 @@
             "aliases": {"Car": "Car(R)"}
         },
         { "id": "05", "tool": "join", "type": "inner", "lt": ["Car(L)"], "rt": ["Car(R)"] },
-        { "id": "06", "tool": "output", "format": "csv", "path": "./output" }
+        { "id": "06", "tool": "output", "format": "csv", "path": "./output", "overwrite": true }
     ],
     "links": [
         { "src": "01", "dst": "03" },
