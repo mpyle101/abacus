@@ -15,13 +15,18 @@
             "aliases": {"Car": "Car(R)"}
         },
         { "id": "05", "tool": "join", "type": "inner", "lt": ["Car(L)"], "rt": ["Car(R)"] },
-        { "id": "06", "tool": "output", "format": "json", "path": "./output", "overwrite": true }
+        { "id": "06", "tool": "output", "format": "csv", "path": "./output-select", "overwrite": true },
+        { "id": "07", "tool": "union" },
+        { "id": "08", "tool": "output", "format": "json", "path": "./output-union", "overwrite": true }
     ],
     "links": [
         { "src": "01", "dst": "03" },
         { "src": "02", "dst": "04" },
         { "src": "03", "dst": "05", "input": "left" },
         { "src": "04", "dst": "05", "input": "right" },
-        { "src": "05", "dst": "06" }
+        { "src": "05", "dst": "06" },
+        { "src": "01", "dst": "07", "input": "left" },
+        { "src": "02", "dst": "07", "input": "right" },
+        { "src": "07", "dst": "08" }
     ]
 }

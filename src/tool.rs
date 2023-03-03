@@ -22,8 +22,9 @@ impl Tool {
 
         let id = plan.id();
         let action = match plan {
-            join(conf)   => Action::Join(JoinConfig::new(conf)),
-            select(conf) => Action::Select(SelectConfig::new(conf)),
+            union(_)      => Action::Union,
+            join(conf)    => Action::Join(JoinConfig::new(conf)),
+            select(conf)  => Action::Select(SelectConfig::new(conf)),
             input(format) => match format {
                 Input::csv(conf)     => Action::InputCsv(CsvInputConfig::new(&conf.path)),
                 Input::avro(conf)    => Action::InputAvro(AvroInputConfig::new(&conf.path)),
@@ -84,6 +85,7 @@ pub enum Action {
     // Data
     Join(JoinConfig),
     Select(SelectConfig),
+    Union,
 
     // Input
     InputCsv(CsvInputConfig),
@@ -103,7 +105,7 @@ impl Action {
 
         match self {
             InputCsv(_) | InputAvro(_) | InputParquet(_) => 0,
-            Join(_) => 2,
+            Join(_) | Union => 2,
             _ => 1
         }
     }
@@ -113,7 +115,7 @@ impl Action {
         use Action::*;
 
         match self {
-            Join(_) | Select(_) => false,
+            Join(_) | Select(_) | Union => false,
             InputCsv(_) | InputAvro(_) | InputParquet(_) => true,
             OutputCsv(_) | OutputJson(_) | OutputParquet(_) => true
         }
@@ -143,7 +145,7 @@ impl Action {
         match self {
             OutputCsv(conf) => {
                 if conf.overwrite {
-                    fs::remove_dir_all(&conf.path)?;
+                    let _ = fs::remove_dir_all(&conf.path);
                 }
                 let plan = data.left.take().unwrap().create_physical_plan().await?;
                 ctx.write_csv(plan, &conf.path).await?;
@@ -151,7 +153,7 @@ impl Action {
             },
             OutputJson(conf) => {
                 if conf.overwrite {
-                    fs::remove_dir_all(&conf.path)?;
+                    let _ = fs::remove_dir_all(&conf.path);
                 }
                 let plan = data.left.take().unwrap().create_physical_plan().await?;
                 ctx.write_json(plan, &conf.path).await?;
@@ -159,7 +161,7 @@ impl Action {
             },
             OutputParquet(conf) => {
                 if conf.overwrite {
-                    fs::remove_dir_all(&conf.path)?;
+                    let _ = fs::remove_dir_all(&conf.path);
                 }
                 let plan = data.left.take().unwrap().create_physical_plan().await?;
                 ctx.write_parquet(plan, &conf.path, None).await?;
@@ -200,6 +202,12 @@ impl Action {
                 let frame = df.select(exprs)?;
                 Ok(Some(frame))
             },
+            Union => {
+                let df = data.left.take().unwrap();
+                let other = data.right.take().unwrap();
+                let frame = df.union(other)?;
+                Ok(Some(frame))
+            }
             _ => panic!("Async tool running sync")
         }
     }

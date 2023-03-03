@@ -36,6 +36,7 @@ pub enum Tool {
     output(Output),
     join(Join),
     select(Select),
+    union(Union)
 }
 
 impl Tool {
@@ -48,6 +49,7 @@ impl Tool {
             output(tool) => tool.id(),
             join(tool)   => tool.id.clone(),
             select(tool) => tool.id.clone(),
+            union(tool)  => tool.id.clone(),
         }
     }
 }
@@ -169,4 +171,9 @@ pub struct Select {
     pub id: String,
     pub columns: Vec<String>,
     pub aliases: HashMap<String, String>,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+pub struct Union {
+    pub id: String
 }

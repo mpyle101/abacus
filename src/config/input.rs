@@ -1,5 +1,6 @@
 
 #[derive(Clone, Debug)]
+#[allow(unused)]
 pub struct CsvInputConfig {
     pub path: String,
     header: bool,
