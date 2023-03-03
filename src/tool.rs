@@ -31,6 +31,7 @@ impl Tool {
             },
             output(format) => match format {
                 Output::csv(conf)     => Action::OutputCsv(CsvOutputConfig::new(&conf.path, conf.overwrite)),
+                Output::json(conf)    => Action::OutputJson(JsonOutputConfig::new(&conf.path, conf.overwrite)),
                 Output::parquet(conf) => Action::OutputParquet(ParquetOutputConfig::new(&conf.path, conf.overwrite)),
             },
         };
@@ -91,6 +92,7 @@ pub enum Action {
 
     // Output
     OutputCsv(CsvOutputConfig),
+    OutputJson(JsonOutputConfig),
     OutputParquet(ParquetOutputConfig),
 }
 
@@ -113,7 +115,7 @@ impl Action {
         match self {
             Join(_) | Select(_) => false,
             InputCsv(_) | InputAvro(_) | InputParquet(_) => true,
-            OutputCsv(_) | OutputParquet(_) => true
+            OutputCsv(_) | OutputJson(_) | OutputParquet(_) => true
         }
     }
 
@@ -141,15 +143,23 @@ impl Action {
         match self {
             OutputCsv(conf) => {
                 if conf.overwrite {
-                    fs::remove_dir_all(&conf.path);
+                    fs::remove_dir_all(&conf.path)?;
                 }
                 let plan = data.left.take().unwrap().create_physical_plan().await?;
                 ctx.write_csv(plan, &conf.path).await?;
                 Ok(None)
             },
+            OutputJson(conf) => {
+                if conf.overwrite {
+                    fs::remove_dir_all(&conf.path)?;
+                }
+                let plan = data.left.take().unwrap().create_physical_plan().await?;
+                ctx.write_json(plan, &conf.path).await?;
+                Ok(None)
+            },
             OutputParquet(conf) => {
                 if conf.overwrite {
-                    fs::remove_dir_all(&conf.path);
+                    fs::remove_dir_all(&conf.path)?;
                 }
                 let plan = data.left.take().unwrap().create_physical_plan().await?;
                 ctx.write_parquet(plan, &conf.path, None).await?;

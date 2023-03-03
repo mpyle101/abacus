@@ -12,6 +12,18 @@ impl CsvOutputConfig {
 }
 
 #[derive(Clone, Debug)]
+pub struct JsonOutputConfig {
+    pub path: String,
+    pub overwrite: bool,
+}
+impl JsonOutputConfig {
+    pub fn new(path: &str, overwrite: bool) -> JsonOutputConfig
+    {
+        JsonOutputConfig { path: path.to_string(), overwrite  }
+    }
+}
+
+#[derive(Clone, Debug)]
 pub struct ParquetOutputConfig {
     pub path: String,
     pub overwrite: bool,

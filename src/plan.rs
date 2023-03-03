@@ -97,6 +97,7 @@ pub struct InputParquet {
 #[allow(non_camel_case_types)]
 pub enum Output {
     csv(OutputCsv),
+    json(OutputJson),
     parquet(OutputParquet),
 }
 
@@ -107,6 +108,7 @@ impl Output {
 
         match self {
             csv(tool)     => tool.id.clone(),
+            json(tool)    => tool.id.clone(),
             parquet(tool) => tool.id.clone(),
         }
     }
@@ -114,6 +116,15 @@ impl Output {
 
 #[derive(Debug, Deserialize)]
 pub struct OutputCsv {
+    pub id: String,
+    pub path: String,
+
+    #[serde(default)]
+    pub overwrite: bool,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct OutputJson {
     pub id: String,
     pub path: String,
 
