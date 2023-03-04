@@ -22,7 +22,7 @@ impl Tool {
 
         let id = plan.id();
         let action = match plan {
-            union(_)      => Action::Union,
+            union(conf)   => Action::Union(UnionConfig::new(conf)),
             join(conf)    => Action::Join(JoinConfig::new(conf)),
             select(conf)  => Action::Select(SelectConfig::new(conf)),
             input(format) => match format {
@@ -85,7 +85,7 @@ pub enum Action {
     // Data
     Join(JoinConfig),
     Select(SelectConfig),
-    Union,
+    Union(UnionConfig),
 
     // Input
     InputCsv(CsvInputConfig),
@@ -105,7 +105,7 @@ impl Action {
 
         match self {
             InputCsv(_) | InputAvro(_) | InputParquet(_) => 0,
-            Join(_) | Union => 2,
+            Join(_) | Union(_) => 2,
             _ => 1
         }
     }
@@ -115,7 +115,7 @@ impl Action {
         use Action::*;
 
         match self {
-            Join(_) | Select(_) | Union => false,
+            Join(_) | Select(_) | Union(_) => false,
             InputCsv(_) | InputAvro(_) | InputParquet(_) => true,
             OutputCsv(_) | OutputJson(_) | OutputParquet(_) => true
         }
@@ -202,10 +202,14 @@ impl Action {
                 let frame = df.select(exprs)?;
                 Ok(Some(frame))
             },
-            Union => {
+            Union(conf) => {
                 let df = data.left.take().unwrap();
                 let other = data.right.take().unwrap();
-                let frame = df.union(other)?;
+                let frame = if conf.distinct {
+                    df.union_distinct(other)?
+                } else {
+                    df.union(other)?
+                };
                 Ok(Some(frame))
             }
             _ => panic!("Async tool running sync")

@@ -175,5 +175,8 @@ pub struct Select {
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct Union {
-    pub id: String
+    pub id: String,
+
+    #[serde(default)]
+    pub distinct: bool,
 }
