@@ -26,9 +26,9 @@ impl Tool {
             join(conf)    => Action::Join(JoinConfig::new(conf)),
             select(conf)  => Action::Select(SelectConfig::new(conf)),
             input(format) => match format {
-                Input::csv(conf)     => Action::InputCsv(CsvInputConfig::new(&conf.path)),
-                Input::avro(conf)    => Action::InputAvro(AvroInputConfig::new(&conf.path)),
-                Input::parquet(conf) => Action::InputParquet(ParquetInputConfig::new(&conf.path)),
+                Input::csv(conf)     => Action::InputCsv(CsvInputConfig::new(conf)),
+                Input::avro(conf)    => Action::InputAvro(AvroInputConfig::new(conf)),
+                Input::parquet(conf) => Action::InputParquet(ParquetInputConfig::new(conf)),
             },
             output(format) => match format {
                 Output::csv(conf)     => Action::OutputCsv(CsvOutputConfig::new(&conf.path, conf.overwrite)),
@@ -127,15 +127,18 @@ impl Action {
 
         match self {
             InputCsv(conf) => {
-                let df = ctx.read_csv(&conf.path, CsvReadOptions::default()).await?;
+                let mut df = ctx.read_csv(&conf.path, CsvReadOptions::default()).await?;
+                df = df.limit(0, conf.limit)?;
                 return Ok(Some(df))
             },
             InputAvro(conf) => {
-                let df = ctx.read_avro(&conf.path, AvroReadOptions::default()).await?;
+                let mut df = ctx.read_avro(&conf.path, AvroReadOptions::default()).await?;
+                df = df.limit(0, conf.limit)?;
                 return Ok(Some(df))
             },
             InputParquet(conf) => {
-                let df = ctx.read_parquet(&conf.path, ParquetReadOptions::default()).await?;
+                let mut df = ctx.read_parquet(&conf.path, ParquetReadOptions::default()).await?;
+                df = df.limit(0, conf.limit)?;
                 return Ok(Some(df))
             },
             _ => {}

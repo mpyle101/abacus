@@ -2,22 +2,31 @@
     "id": "01",
     "name": "joiner",
     "tools": [
-        { "id": "01", "tool": "input", "format": "csv", "path": "./test/data/csv/cars.csv" },
+        {
+            "id": "01",
+            "tool": "input",
+            "limit": 50,
+            "format": "csv",
+            "path": "./test/data/csv/cars.csv"
+        },
         { "id": "02", "tool": "input", "format": "csv", "path": "./test/data/csv/cars.csv" },
         { 
-            "id": "03", "tool": "select",
+            "id": "03",
+            "tool": "select",
             "columns": ["Car", "MPG", "Cylinders", "Displacement", "Horsepower"],
             "aliases": {"Car": "Car(L)"}
         },
         { 
-            "id": "04", "tool": "select",
+            "id": "04",
+            "tool": "select",
             "columns": ["Car", "Weight", "Acceleration", "Model", "Origin"],
             "aliases": {"Car": "Car(R)"}
         },
         { "id": "05", "tool": "join", "type": "inner", "lt": ["Car(L)"], "rt": ["Car(R)"] },
         { "id": "06", "tool": "output", "format": "csv", "path": "./output-select", "overwrite": true },
         { "id": "07", "tool": "union", "distinct": true },
-        { "id": "08", "tool": "output", "format": "json", "path": "./output-union", "overwrite": true }
+        { "id": "08", "tool": "output", "format": "json", "path": "./output-union", "overwrite": true },
+        { "id": "09", "tool": "output", "format": "json", "path": "./output-raw", "overwrite": true }
     ],
     "links": [
         { "src": "01", "dst": "03" },
@@ -27,6 +36,7 @@
         { "src": "05", "dst": "06" },
         { "src": "01", "dst": "07", "input": "left" },
         { "src": "02", "dst": "07", "input": "right" },
-        { "src": "07", "dst": "08" }
+        { "src": "07", "dst": "08" },
+        { "src": "01", "dst": "09" }
     ]
 }

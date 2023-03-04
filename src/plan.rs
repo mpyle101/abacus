@@ -80,18 +80,21 @@ impl Input {
 pub struct InputCsv {
     pub id: String,
     pub path: String,
+    pub limit: Option<usize>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct InputAvro {
     pub id: String,
     pub path: String,
+    pub limit: Option<usize>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct InputParquet {
     pub id: String,
     pub path: String,
+    pub limit: Option<usize>,
 }
 
 #[derive(Debug, Deserialize)]
