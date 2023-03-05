@@ -18,22 +18,22 @@ pub struct Tool {
 impl Tool {
     pub fn new(plan: &plan::Tool) -> Tool
     {
-        use plan::{Input, Output, Tool::*};
+        use plan::{Import, Export, Tool::*};
 
         let id = plan.id();
         let action = match plan {
             union(conf)   => Action::Union(UnionConfig::new(conf)),
             join(conf)    => Action::Join(JoinConfig::new(conf)),
             select(conf)  => Action::Select(SelectConfig::new(conf)),
-            input(format) => match format {
-                Input::csv(conf)     => Action::InputCsv(CsvInputConfig::new(conf)),
-                Input::avro(conf)    => Action::InputAvro(AvroInputConfig::new(conf)),
-                Input::parquet(conf) => Action::InputParquet(ParquetInputConfig::new(conf)),
+            import(format) => match format {
+                Import::csv(conf)     => Action::ImportCsv(CsvImportConfig::new(conf)),
+                Import::avro(conf)    => Action::ImportAvro(AvroImportConfig::new(conf)),
+                Import::parquet(conf) => Action::ImportParquet(ParquetImportConfig::new(conf)),
             },
-            output(format) => match format {
-                Output::csv(conf)     => Action::OutputCsv(CsvOutputConfig::new(conf)),
-                Output::json(conf)    => Action::OutputJson(JsonOutputConfig::new(conf)),
-                Output::parquet(conf) => Action::OutputParquet(ParquetOutputConfig::new(conf)),
+            export(format) => match format {
+                Export::csv(conf)     => Action::ExportCsv(CsvExportConfig::new(conf)),
+                Export::json(conf)    => Action::ExportJson(JsonExportConfig::new(conf)),
+                Export::parquet(conf) => Action::ExportParquet(ParquetExportConfig::new(conf)),
             },
         };
 
@@ -72,15 +72,15 @@ pub enum Action {
     Select(SelectConfig),
     Union(UnionConfig),
 
-    // Input
-    InputCsv(CsvInputConfig),
-    InputAvro(AvroInputConfig),
-    InputParquet(ParquetInputConfig),
+    // Import
+    ImportCsv(CsvImportConfig),
+    ImportAvro(AvroImportConfig),
+    ImportParquet(ParquetImportConfig),
 
-    // Output
-    OutputCsv(CsvOutputConfig),
-    OutputJson(JsonOutputConfig),
-    OutputParquet(ParquetOutputConfig),
+    // Export
+    ExportCsv(CsvExportConfig),
+    ExportJson(JsonExportConfig),
+    ExportParquet(ParquetExportConfig),
 }
 
 impl Action {
@@ -89,8 +89,8 @@ impl Action {
         use Action::*;
 
         match self {
-            InputCsv(_) | InputAvro(_) | InputParquet(_) => 0,
-            OutputCsv(_) | OutputJson(_) | OutputParquet(_) => 1,
+            ImportCsv(_) | ImportAvro(_) | ImportParquet(_) => 0,
+            ExportCsv(_) | ExportJson(_) | ExportParquet(_) => 1,
             Select(_) => 1,
             Join(_) | Union(_) => 2,
         }
@@ -102,8 +102,8 @@ impl Action {
 
         match self {
             Join(_) | Select(_) | Union(_) => false,
-            InputCsv(_) | InputAvro(_) | InputParquet(_) => true,
-            OutputCsv(_) | OutputJson(_) | OutputParquet(_) => true
+            ImportCsv(_) | ImportAvro(_) | ImportParquet(_) => true,
+            ExportCsv(_) | ExportJson(_) | ExportParquet(_) => true
         }
     }
 
@@ -113,12 +113,12 @@ impl Action {
 
         let mut data = data.unwrap_or_default();
         match self {
-            InputCsv(config)      => read_csv(ctx, config).await,
-            InputAvro(config)     => read_avro(ctx, config).await,
-            InputParquet(config)  => read_parquet(ctx, config).await,
-            OutputCsv(config)     => write_csv(&mut data, ctx, config).await,
-            OutputJson(config)    => write_json(&mut data, ctx, config).await,
-            OutputParquet(config) => write_parquet(&mut data, ctx, config).await,
+            ImportCsv(config)     => read_csv(ctx, config).await,
+            ImportAvro(config)    => read_avro(ctx, config).await,
+            ImportParquet(config) => read_parquet(ctx, config).await,
+            ExportCsv(config)     => write_csv(&mut data, ctx, config).await,
+            ExportJson(config)    => write_json(&mut data, ctx, config).await,
+            ExportParquet(config) => write_parquet(&mut data, ctx, config).await,
             _ => panic!("Sync tool running async")
         }
     }

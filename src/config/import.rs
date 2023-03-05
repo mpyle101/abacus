@@ -1,9 +1,9 @@
-use crate::plan::{InputAvro, InputCsv, InputParquet, Sql};
+use crate::plan::{ImportAvro, ImportCsv, ImportParquet, Sql};
 use datafusion::arrow::datatypes::Field;
 
 #[derive(Clone, Debug)]
 #[allow(unused)]
-pub struct CsvInputConfig {
+pub struct CsvImportConfig {
     pub path: String,
     pub header: bool,
     pub delimiter: u8,
@@ -11,8 +11,8 @@ pub struct CsvInputConfig {
     pub limit: Option<usize>,
     pub fields: Option<Vec<Field>>,
 }
-impl CsvInputConfig {
-    pub fn new(config: &InputCsv) -> CsvInputConfig
+impl CsvImportConfig {
+    pub fn new(config: &ImportCsv) -> CsvImportConfig
     {
         let fields = config.schema.as_ref().map(|v| v.iter()
             .map(|field| 
@@ -23,7 +23,7 @@ impl CsvInputConfig {
                 ))
             .collect());
 
-        CsvInputConfig {
+        CsvImportConfig {
             fields,
             path: config.path.clone(),
             sql: config.sql.clone(),
@@ -35,15 +35,15 @@ impl CsvInputConfig {
 }
 
 #[derive(Clone, Debug)]
-pub struct AvroInputConfig {
+pub struct AvroImportConfig {
     pub path: String,
     pub sql: Option<Sql>,
     pub limit: Option<usize>,
 }
-impl AvroInputConfig {
-    pub fn new(config: &InputAvro) -> AvroInputConfig
+impl AvroImportConfig {
+    pub fn new(config: &ImportAvro) -> AvroImportConfig
     {
-        AvroInputConfig {
+        AvroImportConfig {
             path: config.path.clone(),
             sql: config.sql.clone(),
             limit: config.limit
@@ -52,15 +52,15 @@ impl AvroInputConfig {
 }
 
 #[derive(Clone, Debug)]
-pub struct ParquetInputConfig {
+pub struct ParquetImportConfig {
     pub path: String,
     pub sql: Option<Sql>,
     pub limit: Option<usize>,
 }
-impl ParquetInputConfig {
-    pub fn new(config: &InputParquet) -> ParquetInputConfig
+impl ParquetImportConfig {
+    pub fn new(config: &ImportParquet) -> ParquetImportConfig
     {
-        ParquetInputConfig {
+        ParquetImportConfig {
             path: config.path.clone(),
             sql: config.sql.clone(),
             limit: config.limit

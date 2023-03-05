@@ -24,7 +24,7 @@ impl Data {
     }
 }
 
-pub async fn read_csv(ctx: SessionContext, config: &CsvInputConfig) -> Result<Option<DataFrame>>
+pub async fn read_csv(ctx: SessionContext, config: &CsvImportConfig) -> Result<Option<DataFrame>>
 {
     let schema = config.fields.as_ref().map(
         |fields| Schema::new(fields.clone())
@@ -46,7 +46,7 @@ pub async fn read_csv(ctx: SessionContext, config: &CsvInputConfig) -> Result<Op
     Ok(Some(df.limit(0, config.limit)?))
 }
 
-pub async fn read_avro(ctx: SessionContext, config: &AvroInputConfig) -> Result<Option<DataFrame>>
+pub async fn read_avro(ctx: SessionContext, config: &AvroImportConfig) -> Result<Option<DataFrame>>
 {
     let options = AvroReadOptions::default();
     let df = if let Some(sql) = &config.sql {
@@ -59,7 +59,7 @@ pub async fn read_avro(ctx: SessionContext, config: &AvroInputConfig) -> Result<
     Ok(Some(df.limit(0, config.limit)?))
 }
 
-pub async fn read_parquet(ctx: SessionContext, config: &ParquetInputConfig) -> Result<Option<DataFrame>>
+pub async fn read_parquet(ctx: SessionContext, config: &ParquetImportConfig) -> Result<Option<DataFrame>>
 {
     let options = ParquetReadOptions::default();
     let df = if let Some(sql) = &config.sql {
@@ -74,7 +74,7 @@ pub async fn read_parquet(ctx: SessionContext, config: &ParquetInputConfig) -> R
 pub async fn write_csv(
     data: &mut Data,
     ctx: SessionContext,
-    config: &CsvOutputConfig
+    config: &CsvExportConfig
 ) -> Result<Option<DataFrame>>
 {
     if config.overwrite {
@@ -89,7 +89,7 @@ pub async fn write_csv(
 pub async fn write_json(
     data: &mut Data,
     ctx: SessionContext,
-    config: &JsonOutputConfig
+    config: &JsonExportConfig
 ) -> Result<Option<DataFrame>>
 {
     if config.overwrite {
@@ -104,7 +104,7 @@ pub async fn write_json(
 pub async fn write_parquet(
     data: &mut Data,
     ctx: SessionContext,
-    config: &ParquetOutputConfig
+    config: &ParquetExportConfig
 ) -> Result<Option<DataFrame>>
 {
     if config.overwrite {

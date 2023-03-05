@@ -1,14 +1,14 @@
-use crate::plan::{OutputCsv, OutputJson, OutputParquet};
+use crate::plan::{ExportCsv, ExportJson, ExportParquet};
 
 #[derive(Clone, Debug)]
-pub struct CsvOutputConfig {
+pub struct CsvExportConfig {
     pub path: String,
     pub overwrite: bool,
 }
-impl CsvOutputConfig {
-    pub fn new(conf: &OutputCsv) -> CsvOutputConfig
+impl CsvExportConfig {
+    pub fn new(conf: &ExportCsv) -> CsvExportConfig
     {
-        CsvOutputConfig {
+        CsvExportConfig {
             path: conf.path.clone(),
             overwrite: conf.overwrite.unwrap_or(false),
         }
@@ -16,14 +16,14 @@ impl CsvOutputConfig {
 }
 
 #[derive(Clone, Debug)]
-pub struct JsonOutputConfig {
+pub struct JsonExportConfig {
     pub path: String,
     pub overwrite: bool,
 }
-impl JsonOutputConfig {
-    pub fn new(conf: &OutputJson) -> JsonOutputConfig
+impl JsonExportConfig {
+    pub fn new(conf: &ExportJson) -> JsonExportConfig
     {
-        JsonOutputConfig {
+        JsonExportConfig {
             path: conf.path.clone(),
             overwrite: conf.overwrite.unwrap_or(false),
         }
@@ -31,14 +31,14 @@ impl JsonOutputConfig {
 }
 
 #[derive(Clone, Debug)]
-pub struct ParquetOutputConfig {
+pub struct ParquetExportConfig {
     pub path: String,
     pub overwrite: bool,
 }
-impl ParquetOutputConfig {
-    pub fn new(conf: &OutputParquet) -> ParquetOutputConfig
+impl ParquetExportConfig {
+    pub fn new(conf: &ExportParquet) -> ParquetExportConfig
     {
-        ParquetOutputConfig {
+        ParquetExportConfig {
             path: conf.path.clone(),
             overwrite: conf.overwrite.unwrap_or(false),
         }

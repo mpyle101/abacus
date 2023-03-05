@@ -34,7 +34,7 @@ impl Workflow {
             .map(|schema| {
                 let tool = Tool::new(schema);
                 let node = tools.add_node(tool);
-                if let plan::Tool::input(..) = schema {
+                if let plan::Tool::import(..) = schema {
                     inputs.push(node);
                 }
 

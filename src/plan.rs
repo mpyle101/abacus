@@ -33,8 +33,8 @@ pub struct Link {
 #[serde(tag="tool")]
 #[allow(non_camel_case_types)]
 pub enum Tool {
-    input(Input),
-    output(Output),
+    import(Import),
+    export(Export),
     join(Join),
     select(Select),
     union(Union)
@@ -46,8 +46,8 @@ impl Tool {
         use Tool::*;
 
         match self {
-            input(tool)  => tool.id(),
-            output(tool) => tool.id(),
+            import(tool) => tool.id(),
+            export(tool) => tool.id(),
             join(tool)   => tool.id.clone(),
             select(tool) => tool.id.clone(),
             union(tool)  => tool.id.clone(),
@@ -58,16 +58,16 @@ impl Tool {
 #[derive(Debug, Deserialize)]
 #[serde(tag="format")]
 #[allow(non_camel_case_types)]
-pub enum Input {
-    csv(InputCsv),
-    avro(InputAvro),
-    parquet(InputParquet),
+pub enum Import {
+    csv(ImportCsv),
+    avro(ImportAvro),
+    parquet(ImportParquet),
 }
 
-impl Input {
+impl Import {
     pub fn id(&self) -> String
     {
-        use Input::*;
+        use Import::*;
 
         match self {
             csv(tool)     => tool.id.clone(),
@@ -127,7 +127,7 @@ pub struct Sql {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct InputCsv {
+pub struct ImportCsv {
     pub id: String,
     pub path: String,
     pub limit: Option<usize>,
@@ -138,7 +138,7 @@ pub struct InputCsv {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct InputAvro {
+pub struct ImportAvro {
     pub id: String,
     pub path: String,
     pub limit: Option<usize>,
@@ -146,7 +146,7 @@ pub struct InputAvro {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct InputParquet {
+pub struct ImportParquet {
     pub id: String,
     pub path: String,
     pub limit: Option<usize>,
@@ -156,16 +156,16 @@ pub struct InputParquet {
 #[derive(Debug, Deserialize)]
 #[serde(tag="format")]
 #[allow(non_camel_case_types)]
-pub enum Output {
-    csv(OutputCsv),
-    json(OutputJson),
-    parquet(OutputParquet),
+pub enum Export {
+    csv(ExportCsv),
+    json(ExportJson),
+    parquet(ExportParquet),
 }
 
-impl Output {
+impl Export {
     pub fn id(&self) -> String
     {
-        use Output::*;
+        use Export::*;
 
         match self {
             csv(tool)     => tool.id.clone(),
@@ -176,21 +176,21 @@ impl Output {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct OutputCsv {
+pub struct ExportCsv {
     pub id: String,
     pub path: String,
     pub overwrite: Option<bool>,
 }
 
 #[derive(Debug, Deserialize)]
-pub struct OutputJson {
+pub struct ExportJson {
     pub id: String,
     pub path: String,
     pub overwrite: Option<bool>,
 }
 
 #[derive(Debug, Deserialize)]
-pub struct OutputParquet {
+pub struct ExportParquet {
     pub id: String,
     pub path: String,
     pub overwrite: Option<bool>,
