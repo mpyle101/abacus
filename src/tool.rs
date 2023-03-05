@@ -1,13 +1,12 @@
-use std::fs;
-
-use datafusion::arrow::datatypes::Schema;
 use datafusion::error::Result;
 use datafusion::execution::context::SessionContext;
-use datafusion::execution::options::{AvroReadOptions, CsvReadOptions, ParquetReadOptions};
-use datafusion::prelude::{col, DataFrame};
+use datafusion::prelude::DataFrame;
 
+use crate::actions::*;
 use crate::config::*;
-use crate::{plan, plan::InputSide};
+use crate::plan;
+
+pub use crate::actions::Data as ToolData;
 
 #[derive(Clone, Debug)]
 #[allow(unused)]
@@ -66,21 +65,6 @@ impl Tool {
     }
 }
 
-#[derive(Clone, Debug, Default)]
-pub struct ToolData {
-    left: Option<DataFrame>,
-    right: Option<DataFrame>,
-}
-impl ToolData {
-    pub fn set(&mut self, side: InputSide, df: DataFrame)
-    {
-        match side {
-            InputSide::left  => self.left  = Some(df),
-            InputSide::right => self.right = Some(df),
-        }
-    }
-}
-
 #[derive(Clone, Debug)]
 pub enum Action {
     // Data
@@ -106,8 +90,9 @@ impl Action {
 
         match self {
             InputCsv(_) | InputAvro(_) | InputParquet(_) => 0,
+            OutputCsv(_) | OutputJson(_) | OutputParquet(_) => 1,
+            Select(_) => 1,
             Join(_) | Union(_) => 2,
-            _ => 1
         }
     }
 
@@ -126,67 +111,14 @@ impl Action {
     {
         use Action::*;
 
+        let mut data = data.unwrap_or_default();
         match self {
-            InputCsv(conf) => {
-                let mut df = if let Some(fields) = conf.fields.as_ref() {
-                    let schema = Schema::new(fields.clone());
-                    let options = CsvReadOptions {
-                        schema: Some(&schema),
-                        delimiter: conf.delimiter,
-                        has_header: conf.header,
-                        ..Default::default()
-                    };
-                    ctx.read_csv(&conf.path, options).await?
-                } else {
-                    let options = CsvReadOptions {
-                        delimiter: conf.delimiter,
-                        has_header: conf.header,
-                        ..Default::default()
-                    };
-                    ctx.read_csv(&conf.path, options).await?
-                };
-                df = df.limit(0, conf.limit)?;
-                return Ok(Some(df))
-            },
-            InputAvro(conf) => {
-                let mut df = ctx.read_avro(&conf.path, AvroReadOptions::default()).await?;
-                df = df.limit(0, conf.limit)?;
-                return Ok(Some(df))
-            },
-            InputParquet(conf) => {
-                let mut df = ctx.read_parquet(&conf.path, ParquetReadOptions::default()).await?;
-                df = df.limit(0, conf.limit)?;
-                return Ok(Some(df))
-            },
-            _ => {}
-        }
-
-        let mut data = data.unwrap();
-        match self {
-            OutputCsv(conf) => {
-                if conf.overwrite {
-                    let _ = fs::remove_dir_all(&conf.path);
-                }
-                let plan = data.left.take().unwrap().create_physical_plan().await?;
-                ctx.write_csv(plan, &conf.path).await?;
-                Ok(None)
-            },
-            OutputJson(conf) => {
-                if conf.overwrite {
-                    let _ = fs::remove_dir_all(&conf.path);
-                }
-                let plan = data.left.take().unwrap().create_physical_plan().await?;
-                ctx.write_json(plan, &conf.path).await?;
-                Ok(None)
-            },
-            OutputParquet(conf) => {
-                if conf.overwrite {
-                    let _ = fs::remove_dir_all(&conf.path);
-                }
-                let plan = data.left.take().unwrap().create_physical_plan().await?;
-                ctx.write_parquet(plan, &conf.path, None).await?;
-                Ok(None)
-            },
+            InputCsv(config)      => return read_csv(ctx, config).await,
+            InputAvro(config)     => return read_avro(ctx, config).await,
+            InputParquet(config)  => return read_parquet(ctx, config).await,
+            OutputCsv(config)     => write_csv(&mut data, ctx, config).await,
+            OutputJson(config)    => write_json(&mut data, ctx, config).await,
+            OutputParquet(config) => write_parquet(&mut data, ctx, config).await,
             _ => panic!("Sync tool running async")
         }
     }
@@ -197,41 +129,9 @@ impl Action {
 
         let mut data = data.unwrap();
         match self {
-            Join(conf) => {
-                let left  = data.left.take().unwrap();
-                let right = data.right.take().unwrap();
-                let lt_cols = conf.left_cols.iter()
-                    .map(|c| c.as_ref())
-                    .collect::<Vec<_>>();
-                let rt_cols = conf.right_cols.iter()
-                    .map(|c| c.as_ref())
-                    .collect::<Vec<_>>();
-                let frame = left.join(right, conf.join_type, &lt_cols, &rt_cols, None)?;
-                Ok(Some(frame))
-            },
-            Select(conf) => {
-                let df = data.left.take().unwrap();
-                let exprs = conf.columns.iter()
-                    .map(|c| if let Some(alias) = conf.aliases.get(c) {
-                            col(c).alias(alias)
-                        } else {
-                            col(c)
-                        }
-                    )
-                    .collect::<Vec<_>>();
-                let frame = df.select(exprs)?;
-                Ok(Some(frame))
-            },
-            Union(conf) => {
-                let df = data.left.take().unwrap();
-                let other = data.right.take().unwrap();
-                let frame = if conf.distinct {
-                    df.union_distinct(other)?
-                } else {
-                    df.union(other)?
-                };
-                Ok(Some(frame))
-            }
+            Join(config)   => join(&mut data, config),
+            Select(config) => select(&mut data, config),
+            Union(config)  => union(&mut data, config),
             _ => panic!("Async tool running sync")
         }
     }
