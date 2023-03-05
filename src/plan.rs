@@ -120,6 +120,12 @@ pub struct SchemaField {
     pub variant: SchemaDataType,
 }
 
+#[derive(Clone, Debug, Deserialize)]
+pub struct Sql {
+    pub stmt: String,
+    pub table: String,
+}
+
 #[derive(Debug, Deserialize)]
 pub struct InputCsv {
     pub id: String,
@@ -128,6 +134,7 @@ pub struct InputCsv {
     pub header: Option<bool>,
     pub delimiter: Option<u8>,
     pub schema: Option<Vec<SchemaField>>,
+    pub sql: Option<Sql>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -135,6 +142,7 @@ pub struct InputAvro {
     pub id: String,
     pub path: String,
     pub limit: Option<usize>,
+    pub sql: Option<Sql>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -142,6 +150,7 @@ pub struct InputParquet {
     pub id: String,
     pub path: String,
     pub limit: Option<usize>,
+    pub sql: Option<Sql>,
 }
 
 #[derive(Debug, Deserialize)]

@@ -113,9 +113,9 @@ impl Action {
 
         let mut data = data.unwrap_or_default();
         match self {
-            InputCsv(config)      => return read_csv(ctx, config).await,
-            InputAvro(config)     => return read_avro(ctx, config).await,
-            InputParquet(config)  => return read_parquet(ctx, config).await,
+            InputCsv(config)      => read_csv(ctx, config).await,
+            InputAvro(config)     => read_avro(ctx, config).await,
+            InputParquet(config)  => read_parquet(ctx, config).await,
             OutputCsv(config)     => write_csv(&mut data, ctx, config).await,
             OutputJson(config)    => write_json(&mut data, ctx, config).await,
             OutputParquet(config) => write_parquet(&mut data, ctx, config).await,

@@ -26,21 +26,20 @@ impl Data {
 
 pub async fn read_csv(ctx: SessionContext, config: &CsvInputConfig) -> Result<Option<DataFrame>>
 {
-    let df = if let Some(fields) = config.fields.as_ref() {
-        let schema = Schema::new(fields.clone());
-        let options = CsvReadOptions {
-            schema: Some(&schema),
-            delimiter: config.delimiter,
-            has_header: config.header,
-            ..Default::default()
-        };
-        ctx.read_csv(&config.path, options).await?
+    let schema = config.fields.as_ref().map(
+        |fields| Schema::new(fields.clone())
+    );
+    let options = CsvReadOptions {
+        schema: schema.as_ref(),
+        delimiter: config.delimiter,
+        has_header: config.header,
+        ..Default::default()
+    };
+
+    let df = if let Some(sql) = &config.sql {
+        ctx.register_csv(&sql.table, &config.path, options).await?;
+        ctx.sql(&sql.stmt).await?
     } else {
-        let options = CsvReadOptions {
-            delimiter: config.delimiter,
-            has_header: config.header,
-            ..Default::default()
-        };
         ctx.read_csv(&config.path, options).await?
     };
     
@@ -49,13 +48,26 @@ pub async fn read_csv(ctx: SessionContext, config: &CsvInputConfig) -> Result<Op
 
 pub async fn read_avro(ctx: SessionContext, config: &AvroInputConfig) -> Result<Option<DataFrame>>
 {
-    let df = ctx.read_avro(&config.path, AvroReadOptions::default()).await?;
+    let options = AvroReadOptions::default();
+    let df = if let Some(sql) = &config.sql {
+        ctx.register_avro(&sql.table, &config.path, options).await?;
+        ctx.sql(&sql.stmt).await?
+    } else {
+        ctx.read_avro(&config.path, options).await?
+    };
+
     Ok(Some(df.limit(0, config.limit)?))
 }
 
 pub async fn read_parquet(ctx: SessionContext, config: &ParquetInputConfig) -> Result<Option<DataFrame>>
 {
-    let df = ctx.read_parquet(&config.path, ParquetReadOptions::default()).await?;
+    let options = ParquetReadOptions::default();
+    let df = if let Some(sql) = &config.sql {
+        ctx.register_parquet(&sql.table, &config.path, options).await?;
+        ctx.sql(&sql.stmt).await?
+    } else {
+        ctx.read_parquet(&config.path, options).await?
+    };
     Ok(Some(df.limit(0, config.limit)?))
 }
 

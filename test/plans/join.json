@@ -44,7 +44,19 @@
         { "id": "06", "tool": "output", "format": "csv", "path": "./output/select", "overwrite": true },
         { "id": "07", "tool": "union", "distinct": true },
         { "id": "08", "tool": "output", "format": "json", "path": "./output/union", "overwrite": true },
-        { "id": "09", "tool": "output", "format": "json", "path": "./output/limit", "overwrite": true }
+        { "id": "09", "tool": "output", "format": "json", "path": "./output/limit", "overwrite": true },
+        {
+            "id": "10",
+            "tool": "input",
+            "path": "./test/data/csv/cars-with-header.csv",
+            "format": "csv",
+            "header": true,
+            "sql": {
+                "table": "cars",
+                "stmt": "SELECT \"Car\", \"Displacement\", \"Horsepower\", \"Origin\" FROM cars WHERE \"Displacement\" > 390.0"
+            }
+        },
+        { "id": "11", "tool": "output", "format": "csv", "path": "./output/sql", "overwrite": true }
     ],
     "links": [
         { "src": "01", "dst": "03" },
@@ -55,6 +67,7 @@
         { "src": "01", "dst": "07", "input": "left" },
         { "src": "02", "dst": "07", "input": "right" },
         { "src": "07", "dst": "08" },
-        { "src": "01", "dst": "09" }
+        { "src": "01", "dst": "09" },
+        { "src": "10", "dst": "11" }
     ]
 }

@@ -1,19 +1,20 @@
-use crate::plan::{InputAvro, InputCsv, InputParquet};
+use crate::plan::{InputAvro, InputCsv, InputParquet, Sql};
 use datafusion::arrow::datatypes::Field;
 
 #[derive(Clone, Debug)]
 #[allow(unused)]
 pub struct CsvInputConfig {
     pub path: String,
-    pub limit: Option<usize>,
-    pub fields: Option<Vec<Field>>,
     pub header: bool,
     pub delimiter: u8,
+    pub sql: Option<Sql>,
+    pub limit: Option<usize>,
+    pub fields: Option<Vec<Field>>,
 }
 impl CsvInputConfig {
-    pub fn new(conf: &InputCsv) -> CsvInputConfig
+    pub fn new(config: &InputCsv) -> CsvInputConfig
     {
-        let fields = conf.schema.as_ref().map(|v| v.iter()
+        let fields = config.schema.as_ref().map(|v| v.iter()
             .map(|field| 
                 Field::new(
                     field.column.clone(),
@@ -24,10 +25,11 @@ impl CsvInputConfig {
 
         CsvInputConfig {
             fields,
-            path: conf.path.clone(),
-            limit: conf.limit,
-            header: conf.header.unwrap_or(false), 
-            delimiter: conf.delimiter.unwrap_or(b','),
+            path: config.path.clone(),
+            sql: config.sql.clone(),
+            limit: config.limit,
+            header: config.header.unwrap_or(false), 
+            delimiter: config.delimiter.unwrap_or(b','),
         }
     }
 }
@@ -35,23 +37,33 @@ impl CsvInputConfig {
 #[derive(Clone, Debug)]
 pub struct AvroInputConfig {
     pub path: String,
+    pub sql: Option<Sql>,
     pub limit: Option<usize>,
 }
 impl AvroInputConfig {
-    pub fn new(conf: &InputAvro) -> AvroInputConfig
+    pub fn new(config: &InputAvro) -> AvroInputConfig
     {
-        AvroInputConfig { path: conf.path.clone(), limit: conf.limit }
+        AvroInputConfig {
+            path: config.path.clone(),
+            sql: config.sql.clone(),
+            limit: config.limit
+        }
     }
 }
 
 #[derive(Clone, Debug)]
 pub struct ParquetInputConfig {
     pub path: String,
+    pub sql: Option<Sql>,
     pub limit: Option<usize>,
 }
 impl ParquetInputConfig {
-    pub fn new(conf: &InputParquet) -> ParquetInputConfig
+    pub fn new(config: &InputParquet) -> ParquetInputConfig
     {
-        ParquetInputConfig { path: conf.path.clone(), limit: conf.limit }
+        ParquetInputConfig {
+            path: config.path.clone(),
+            sql: config.sql.clone(),
+            limit: config.limit
+        }
     }
 }
