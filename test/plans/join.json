@@ -17,15 +17,15 @@
             "format": "csv",
             "header": false,
             "schema": [
-                { "Car": "utf8" },
-                { "MPG": "f64" },
-                { "Cylinders": "i16" },
-                { "Displacement": "f32" },
-                { "Horsepower": "f32" },
-                { "Weight": "f32" },
-                { "Acceleration": "f32" },
-                { "Model": "i16" },
-                { "Origin": "utf8" }
+                { "column": "Car", "type": "utf8" },
+                { "column": "MPG", "type": "f64" },
+                { "column": "Cylinders", "type": "i16" },
+                { "column": "Displacement", "type": "f32" },
+                { "column": "Horsepower", "type": "f32" },
+                { "column": "Weight", "type": "f32" },
+                { "column": "Acceleration", "type": "f32" },
+                { "column": "Model", "type": "i16" },
+                { "column": "Origin", "type": "utf8" }
             ]
         },
         { 

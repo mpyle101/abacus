@@ -14,8 +14,12 @@ impl CsvInputConfig {
     pub fn new(conf: &InputCsv) -> CsvInputConfig
     {
         let fields = conf.schema.as_ref().map(|v| v.iter()
-            .flat_map(|m| m.iter()
-                .map(|(col, dt)| Field::new(col, dt.into(), true)))
+            .map(|field| 
+                Field::new(
+                    field.column.clone(),
+                    field.variant.clone().into(),
+                    field.nullable.unwrap_or(true)
+                ))
             .collect());
 
         CsvInputConfig {

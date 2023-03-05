@@ -77,7 +77,7 @@ impl Input {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[allow(non_camel_case_types)]
 pub enum SchemaDataType {
     utf8, bool, null, ts, ms, ns,
@@ -86,7 +86,7 @@ pub enum SchemaDataType {
     f16, f32, f64,
 }
 #[allow(clippy::from_over_into)]
-impl Into<DataType> for &SchemaDataType {
+impl Into<DataType> for SchemaDataType {
     fn into(self) -> DataType
     {
         match self {
@@ -112,13 +112,22 @@ impl Into<DataType> for &SchemaDataType {
 }
 
 #[derive(Debug, Deserialize)]
+pub struct SchemaField {
+    pub column: String,
+    pub nullable: Option<bool>,
+
+    #[serde(rename(deserialize = "type"))]
+    pub variant: SchemaDataType,
+}
+
+#[derive(Debug, Deserialize)]
 pub struct InputCsv {
     pub id: String,
     pub path: String,
     pub limit: Option<usize>,
     pub header: Option<bool>,
     pub delimiter: Option<u8>,
-    pub schema: Option<Vec<HashMap<String, SchemaDataType>>>,
+    pub schema: Option<Vec<SchemaField>>,
 }
 
 #[derive(Debug, Deserialize)]
