@@ -35,6 +35,7 @@ pub struct Link {
 pub enum Tool {
     import(Import),
     export(Export),
+    distinct(Generic),
     difference(Generic),
     intersect(Generic),
     join(Join),
@@ -50,6 +51,7 @@ impl Tool {
         match self {
             import(tool)     => tool.id(),
             export(tool)     => tool.id(),
+            distinct(tool)   => tool.id.clone(),
             difference(tool) => tool.id.clone(),
             intersect(tool)  => tool.id.clone(),
             join(tool)       => tool.id.clone(),

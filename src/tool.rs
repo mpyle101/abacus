@@ -22,6 +22,7 @@ impl Tool {
 
         let id = plan.id();
         let action = match plan {
+            distinct(_)   => Action::Distinct,
             difference(_) => Action::Difference,
             intersect(_)  => Action::Intersect,
             join(conf)    => Action::Join(JoinConfig::new(conf)),
@@ -70,6 +71,7 @@ impl Tool {
 #[derive(Clone, Debug)]
 pub enum Action {
     // Data
+    Distinct,
     Difference,
     Intersect,
     Join(JoinConfig),
@@ -93,7 +95,7 @@ impl Action {
         use Action::*;
 
         match self {
-            Select(_) => 1,
+            Distinct | Select(_) => 1,
             Difference | Intersect | Join(_) | Union(_) => 2,
             ImportCsv(_) | ImportAvro(_) | ImportParquet(_) => 0,
             ExportCsv(_) | ExportJson(_) | ExportParquet(_) => 1,
@@ -105,7 +107,8 @@ impl Action {
         use Action::*;
 
         match self {
-            Difference | Intersect | Join(_) | Select(_) | Union(_) => false,
+            Distinct | Difference | Intersect
+                | Join(_) | Select(_) | Union(_) => false,
             ImportCsv(_) | ImportAvro(_) | ImportParquet(_) => true,
             ExportCsv(_) | ExportJson(_) | ExportParquet(_) => true
         }
@@ -133,6 +136,7 @@ impl Action {
 
         let mut data = data.unwrap();
         match self {
+            Distinct       => distinct(&mut data),
             Difference     => difference(&mut data),
             Intersect      => intersect(&mut data),
             Join(config)   => join(&mut data, config),

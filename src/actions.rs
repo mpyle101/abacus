@@ -124,6 +124,13 @@ pub fn difference(data: &mut Data) -> Result<Option<DataFrame>>
     Ok(Some(left.except(right)?))
 }
 
+pub fn distinct(data: &mut Data) -> Result<Option<DataFrame>>
+{
+    let df = data.left.take().unwrap();
+
+    Ok(Some(df.distinct()?))
+}
+
 pub fn intersect(data: &mut Data) -> Result<Option<DataFrame>>
 {
     let left  = data.left.take().unwrap();
