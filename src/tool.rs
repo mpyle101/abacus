@@ -1,9 +1,10 @@
 use std::fs;
 
-use datafusion::prelude::{col, DataFrame};
+use datafusion::arrow::datatypes::Schema;
 use datafusion::error::Result;
 use datafusion::execution::context::SessionContext;
 use datafusion::execution::options::{AvroReadOptions, CsvReadOptions, ParquetReadOptions};
+use datafusion::prelude::{col, DataFrame};
 
 use crate::config::*;
 use crate::{plan, plan::InputSide};
@@ -31,9 +32,9 @@ impl Tool {
                 Input::parquet(conf) => Action::InputParquet(ParquetInputConfig::new(conf)),
             },
             output(format) => match format {
-                Output::csv(conf)     => Action::OutputCsv(CsvOutputConfig::new(&conf.path, conf.overwrite)),
-                Output::json(conf)    => Action::OutputJson(JsonOutputConfig::new(&conf.path, conf.overwrite)),
-                Output::parquet(conf) => Action::OutputParquet(ParquetOutputConfig::new(&conf.path, conf.overwrite)),
+                Output::csv(conf)     => Action::OutputCsv(CsvOutputConfig::new(conf)),
+                Output::json(conf)    => Action::OutputJson(JsonOutputConfig::new(conf)),
+                Output::parquet(conf) => Action::OutputParquet(ParquetOutputConfig::new(conf)),
             },
         };
 
@@ -127,7 +128,23 @@ impl Action {
 
         match self {
             InputCsv(conf) => {
-                let mut df = ctx.read_csv(&conf.path, CsvReadOptions::default()).await?;
+                let mut df = if let Some(fields) = conf.fields.as_ref() {
+                    let schema = Schema::new(fields.clone());
+                    let options = CsvReadOptions {
+                        schema: Some(&schema),
+                        delimiter: conf.delimiter,
+                        has_header: conf.header,
+                        ..Default::default()
+                    };
+                    ctx.read_csv(&conf.path, options).await?
+                } else {
+                    let options = CsvReadOptions {
+                        delimiter: conf.delimiter,
+                        has_header: conf.header,
+                        ..Default::default()
+                    };
+                    ctx.read_csv(&conf.path, options).await?
+                };
                 df = df.limit(0, conf.limit)?;
                 return Ok(Some(df))
             },

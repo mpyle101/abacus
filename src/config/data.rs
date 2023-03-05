@@ -48,6 +48,6 @@ pub struct UnionConfig {
 impl UnionConfig {
     pub fn new(config: &Union) -> UnionConfig
     {
-        UnionConfig { distinct: config.distinct }
+        UnionConfig { distinct: config.distinct.unwrap_or(false) }
     }
 }

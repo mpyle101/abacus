@@ -1,3 +1,4 @@
+use crate::plan::{OutputCsv, OutputJson, OutputParquet};
 
 #[derive(Clone, Debug)]
 pub struct CsvOutputConfig {
@@ -5,9 +6,12 @@ pub struct CsvOutputConfig {
     pub overwrite: bool,
 }
 impl CsvOutputConfig {
-    pub fn new(path: &str, overwrite: bool) -> CsvOutputConfig
+    pub fn new(conf: &OutputCsv) -> CsvOutputConfig
     {
-        CsvOutputConfig { path: path.to_string(), overwrite  }
+        CsvOutputConfig {
+            path: conf.path.clone(),
+            overwrite: conf.overwrite.unwrap_or(false),
+        }
     }
 }
 
@@ -17,9 +21,12 @@ pub struct JsonOutputConfig {
     pub overwrite: bool,
 }
 impl JsonOutputConfig {
-    pub fn new(path: &str, overwrite: bool) -> JsonOutputConfig
+    pub fn new(conf: &OutputJson) -> JsonOutputConfig
     {
-        JsonOutputConfig { path: path.to_string(), overwrite  }
+        JsonOutputConfig {
+            path: conf.path.clone(),
+            overwrite: conf.overwrite.unwrap_or(false),
+        }
     }
 }
 
@@ -29,8 +36,11 @@ pub struct ParquetOutputConfig {
     pub overwrite: bool,
 }
 impl ParquetOutputConfig {
-    pub fn new(path: &str, overwrite: bool) -> ParquetOutputConfig
+    pub fn new(conf: &OutputParquet) -> ParquetOutputConfig
     {
-        ParquetOutputConfig { path: path.to_string(), overwrite }
+        ParquetOutputConfig {
+            path: conf.path.clone(),
+            overwrite: conf.overwrite.unwrap_or(false),
+        }
     }
 }

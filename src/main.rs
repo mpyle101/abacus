@@ -29,12 +29,12 @@ async fn main()
     let args = Args::parse();
 
     let plan = read_plan(args.plan).unwrap();
-    if args.debug > 0 { println!("{:?}", plan); }
+    if args.debug > 1 { println!("{:?}", plan); }
 
     let wf = Workflow::new(&plan);
-    if args.debug > 0 { println!("{:?}", wf); }
+    if args.debug > 1 { println!("{:?}", wf); }
 
-    wf.run().await.unwrap()
+    wf.run(args.debug).await.unwrap()
 }
 
 fn read_plan<P>(path: P) -> Result<plan::Plan, Box<dyn Error>>

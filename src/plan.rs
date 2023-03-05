@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use datafusion::arrow::datatypes::{DataType, TimeUnit};
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
@@ -77,10 +78,46 @@ impl Input {
 }
 
 #[derive(Debug, Deserialize)]
+#[allow(non_camel_case_types)]
+pub enum SchemaDataType {
+    utf8, bool, null, ts, ms, ns,
+    i8, i16, i32, i64,
+    u8, u16, u32, u64,
+    f16, f32, f64,
+}
+impl Into<DataType> for &SchemaDataType {
+    fn into(self) -> DataType
+    {
+        match self {
+            SchemaDataType::ts   => DataType::Timestamp(TimeUnit::Second, None),
+            SchemaDataType::ms   => DataType::Timestamp(TimeUnit::Millisecond, None),
+            SchemaDataType::ns   => DataType::Timestamp(TimeUnit::Nanosecond, None),
+            SchemaDataType::utf8 => DataType::Utf8,
+            SchemaDataType::bool => DataType::Boolean,
+            SchemaDataType::null => DataType::Null,
+            SchemaDataType::i8   => DataType::Int8,
+            SchemaDataType::i16  => DataType::Int16,
+            SchemaDataType::i32  => DataType::Int32,
+            SchemaDataType::i64  => DataType::Int64,
+            SchemaDataType::u8   => DataType::UInt8,
+            SchemaDataType::u16  => DataType::UInt16,
+            SchemaDataType::u32  => DataType::UInt32,
+            SchemaDataType::u64  => DataType::UInt64,
+            SchemaDataType::f16  => DataType::Float16,
+            SchemaDataType::f32  => DataType::Float32,
+            SchemaDataType::f64  => DataType::Float64,
+        }
+    }
+}
+
+#[derive(Debug, Deserialize)]
 pub struct InputCsv {
     pub id: String,
     pub path: String,
     pub limit: Option<usize>,
+    pub header: Option<bool>,
+    pub delimiter: Option<u8>,
+    pub schema: Option<Vec<HashMap<String, SchemaDataType>>>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -123,27 +160,21 @@ impl Output {
 pub struct OutputCsv {
     pub id: String,
     pub path: String,
-
-    #[serde(default)]
-    pub overwrite: bool,
+    pub overwrite: Option<bool>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct OutputJson {
     pub id: String,
     pub path: String,
-
-    #[serde(default)]
-    pub overwrite: bool,
+    pub overwrite: Option<bool>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct OutputParquet {
     pub id: String,
     pub path: String,
-
-    #[serde(default)]
-    pub overwrite: bool,
+    pub overwrite: Option<bool>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -179,7 +210,5 @@ pub struct Select {
 #[derive(Clone, Debug, Deserialize)]
 pub struct Union {
     pub id: String,
-
-    #[serde(default)]
-    pub distinct: bool,
+    pub distinct: Option<bool>,
 }

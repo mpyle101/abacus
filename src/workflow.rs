@@ -57,18 +57,19 @@ impl Workflow {
         }
     }
 
-    pub async fn run(&self) -> Result<(), Box<dyn Error>>
+    pub async fn run(&self, debug: u8) -> Result<(), Box<dyn Error>>
     {
         use std::collections::VecDeque;
 
         let mut dfs: HashMap<NodeIndex, ToolData> = HashMap::new();
         let mut ready = VecDeque::from_iter(self.inputs.iter().cloned());
         while !ready.is_empty() {
-            println!("{:?}", ready);
-
             let mut results = vec![];
             let mut async_tools = JoinSet::new();
             while let Some(ix) = ready.pop_front() {
+                if debug > 0 {
+                    println!("{:?}", self.tools[ix])
+                }
                 let data = dfs.remove(&ix);
                 if self.tools[ix].is_async() {
                     let ctx = SessionContext::new();

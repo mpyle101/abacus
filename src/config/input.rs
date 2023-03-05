@@ -1,21 +1,29 @@
 use crate::plan::{InputAvro, InputCsv, InputParquet};
+use datafusion::arrow::datatypes::Field;
 
 #[derive(Clone, Debug)]
 #[allow(unused)]
 pub struct CsvInputConfig {
     pub path: String,
     pub limit: Option<usize>,
-    header: bool,
-    delimiter: u8,
+    pub fields: Option<Vec<Field>>,
+    pub header: bool,
+    pub delimiter: u8,
 }
 impl CsvInputConfig {
     pub fn new(conf: &InputCsv) -> CsvInputConfig
     {
+        let fields = conf.schema.as_ref().map(|v| v.iter()
+            .flat_map(|m| m.iter()
+                .map(|(col, dt)| Field::new(col, dt.into(), true)))
+            .collect());
+
         CsvInputConfig {
+            fields,
             path: conf.path.clone(),
             limit: conf.limit,
-            header: true, 
-            delimiter: b','
+            header: conf.header.unwrap_or(false), 
+            delimiter: conf.delimiter.unwrap_or(b','),
         }
     }
 }
