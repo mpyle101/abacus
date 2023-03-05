@@ -116,6 +116,22 @@ pub async fn write_parquet(
     Ok(None)
 }
 
+pub fn difference(data: &mut Data) -> Result<Option<DataFrame>>
+{
+    let left  = data.left.take().unwrap();
+    let right = data.right.take().unwrap();
+
+    Ok(Some(left.except(right)?))
+}
+
+pub fn intersect(data: &mut Data) -> Result<Option<DataFrame>>
+{
+    let left  = data.left.take().unwrap();
+    let right = data.right.take().unwrap();
+
+    Ok(Some(left.intersect(right)?))
+}
+
 pub fn join(data: &mut Data, config: &JoinConfig) -> Result<Option<DataFrame>>
 {
     let left  = data.left.take().unwrap();

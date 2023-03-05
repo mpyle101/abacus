@@ -35,6 +35,8 @@ pub struct Link {
 pub enum Tool {
     import(Import),
     export(Export),
+    difference(Generic),
+    intersect(Generic),
     join(Join),
     select(Select),
     union(Union)
@@ -46,11 +48,13 @@ impl Tool {
         use Tool::*;
 
         match self {
-            import(tool) => tool.id(),
-            export(tool) => tool.id(),
-            join(tool)   => tool.id.clone(),
-            select(tool) => tool.id.clone(),
-            union(tool)  => tool.id.clone(),
+            import(tool)     => tool.id(),
+            export(tool)     => tool.id(),
+            difference(tool) => tool.id.clone(),
+            intersect(tool)  => tool.id.clone(),
+            join(tool)       => tool.id.clone(),
+            select(tool)     => tool.id.clone(),
+            union(tool)      => tool.id.clone(),
         }
     }
 }
@@ -207,6 +211,11 @@ pub enum JoinType {
     right_semi,
     left_anti,
     right_anti,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+pub struct Generic {
+    pub id: String,
 }
 
 #[derive(Debug, Deserialize)]
