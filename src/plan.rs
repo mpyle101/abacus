@@ -85,6 +85,7 @@ pub enum SchemaDataType {
     u8, u16, u32, u64,
     f16, f32, f64,
 }
+#[allow(clippy::from_over_into)]
 impl Into<DataType> for &SchemaDataType {
     fn into(self) -> DataType
     {
