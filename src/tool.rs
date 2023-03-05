@@ -22,9 +22,9 @@ impl Tool {
 
         let id = plan.id();
         let action = match plan {
-            union(conf)   => Action::Union(UnionConfig::new(conf)),
-            join(conf)    => Action::Join(JoinConfig::new(conf)),
-            select(conf)  => Action::Select(SelectConfig::new(conf)),
+            join(conf)   => Action::Join(JoinConfig::new(conf)),
+            select(conf) => Action::Select(SelectConfig::new(conf)),
+            union(conf)  => Action::Union(UnionConfig::new(conf)),
             import(format) => match format {
                 Import::csv(conf)     => Action::ImportCsv(CsvImportConfig::new(conf)),
                 Import::avro(conf)    => Action::ImportAvro(AvroImportConfig::new(conf)),
@@ -89,10 +89,10 @@ impl Action {
         use Action::*;
 
         match self {
-            ImportCsv(_) | ImportAvro(_) | ImportParquet(_) => 0,
-            ExportCsv(_) | ExportJson(_) | ExportParquet(_) => 1,
             Select(_) => 1,
             Join(_) | Union(_) => 2,
+            ImportCsv(_) | ImportAvro(_) | ImportParquet(_) => 0,
+            ExportCsv(_) | ExportJson(_) | ExportParquet(_) => 1,
         }
     }
 
