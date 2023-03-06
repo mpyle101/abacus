@@ -3,7 +3,7 @@
     "tools": [
         { "id": "01", "tool": "join", "type": "inner", "lt": ["a1", "b1"], "rt": ["a2", "b2"] },
         { "id": "02", "tool": "input", "format": "csv", "path": "./example.csv", "query": "SELECT a, MIN(b) FROM example GROUP BY a LIMIT 100" },
-        { "id": "03", "tool": "project", "expr": [
+        { "id": "03", "tool": "project", "exprs": [
             {"add": [{"col": "a"}, {"col": "b"}, {"num": 2.5}], "alias": "d"},
             {"col": "c"}
         ]},

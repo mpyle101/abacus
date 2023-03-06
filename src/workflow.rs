@@ -22,7 +22,6 @@ pub struct Workflow {
     tools: WorkflowGraph,
     inputs: Vec<NodeIndex>,
 }
-
 impl Workflow {
     pub fn new(plan: &Plan) -> Workflow
     {
@@ -50,8 +49,8 @@ impl Workflow {
             });
 
         Workflow { 
-            id: plan.id.clone(),
-            name: plan.name.clone(),
+            id: plan.id.to_string(),
+            name: plan.name.to_string(),
             tools,
             inputs,
         }
@@ -72,8 +71,9 @@ impl Workflow {
                 }
                 let data = dfs.remove(&ix);
                 if self.tools[ix].is_async() {
-                    let ctx = SessionContext::new();
-                    async_tools.spawn(run_async(ix, ctx, self.tools[ix].clone(), data));
+                    let ctx  = SessionContext::new();
+                    let tool = self.tools[ix].clone();
+                    async_tools.spawn(async move { run_async(ix, ctx, tool, data).await });
                 } else {
                     results.push((ix, self.tools[ix].run_sync(data)?))
                 }
@@ -102,7 +102,12 @@ impl Workflow {
 
 }
 
-async fn run_async(ix: NodeIndex, ctx: SessionContext, tool: Tool, data: Option<ToolData>) -> Result<(NodeIndex, Option<DataFrame>)>
+async fn run_async(
+    ix: NodeIndex,
+    ctx: SessionContext,
+    tool: Tool,
+    data: Option<ToolData>
+) -> Result<(NodeIndex, Option<DataFrame>)>
 {
     let res = tool.run_async(ctx, data).await?;
     Ok((ix, res))

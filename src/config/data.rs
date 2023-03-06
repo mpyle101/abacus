@@ -25,7 +25,14 @@ impl JoinConfig {
             right_anti => JoinType::RightAnti,
         };
 
-        JoinConfig { join_type, left_cols: config.lt.clone(), right_cols: config.rt.clone() }
+        let left_cols = config.lt.iter()
+            .map(|c| c.to_string())
+            .collect();
+        let right_cols = config.rt.iter()
+            .map(|c| c.to_string())
+            .collect();
+        
+        JoinConfig { join_type, left_cols, right_cols }
     }
 }
 
@@ -37,7 +44,14 @@ pub struct SelectConfig {
 impl SelectConfig {
     pub fn new(config: &Select) -> SelectConfig
     {
-        SelectConfig { aliases: config.aliases.clone(), columns: config.columns.clone() }
+        let aliases = config.aliases.iter()
+            .map(|(k, v)| (k.to_string(), v.to_string()))
+            .collect();
+        let columns = config.columns.iter()
+            .map(|c| c.to_string())
+            .collect();
+
+        SelectConfig { aliases, columns }
     }
 }
 

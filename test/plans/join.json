@@ -52,8 +52,8 @@
             "format": "csv",
             "header": true,
             "sql": {
-                "table": "cars",
-                "stmt": "SELECT \"Car\", \"Displacement\", \"Horsepower\", \"Origin\" FROM cars WHERE \"Displacement\" > 390.0"
+                "stmt": "SELECT \"Car\", \"Displacement\", \"Horsepower\", \"Origin\" FROM cars WHERE \"Displacement\" > 390.0",
+                "table": "cars"
             }
         },
         { "id": "11", "tool": "export", "format": "csv", "path": "./output/sql", "overwrite": true }

@@ -6,11 +6,11 @@ pub struct CsvExportConfig {
     pub overwrite: bool,
 }
 impl CsvExportConfig {
-    pub fn new(conf: &ExportCsv) -> CsvExportConfig
+    pub fn new(config: &ExportCsv) -> CsvExportConfig
     {
         CsvExportConfig {
-            path: conf.path.clone(),
-            overwrite: conf.overwrite.unwrap_or(false),
+            path: config.path.to_string(),
+            overwrite: config.overwrite.unwrap_or(false),
         }
     }
 }
@@ -21,11 +21,11 @@ pub struct JsonExportConfig {
     pub overwrite: bool,
 }
 impl JsonExportConfig {
-    pub fn new(conf: &ExportJson) -> JsonExportConfig
+    pub fn new(config: &ExportJson) -> JsonExportConfig
     {
         JsonExportConfig {
-            path: conf.path.clone(),
-            overwrite: conf.overwrite.unwrap_or(false),
+            path: config.path.to_string(),
+            overwrite: config.overwrite.unwrap_or(false),
         }
     }
 }
@@ -36,11 +36,11 @@ pub struct ParquetExportConfig {
     pub overwrite: bool,
 }
 impl ParquetExportConfig {
-    pub fn new(conf: &ExportParquet) -> ParquetExportConfig
+    pub fn new(config: &ExportParquet) -> ParquetExportConfig
     {
         ParquetExportConfig {
-            path: conf.path.clone(),
-            overwrite: conf.overwrite.unwrap_or(false),
+            path: config.path.to_string(),
+            overwrite: config.overwrite.unwrap_or(false),
         }
     }
 }

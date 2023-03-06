@@ -4,12 +4,11 @@ mod plan;
 mod tool;
 mod workflow;
 
-use std::error::Error;
-use std::fs::File;
-use std::io::BufReader;
-use std::path::{Path, PathBuf};
+use std::fs;
+use std::path::PathBuf;
 
 use clap::Parser;
+use plan::Plan;
 use workflow::Workflow;
 
 #[derive(Parser)]
@@ -28,22 +27,13 @@ struct Args {
 async fn main()
 {
     let args = Args::parse();
+    let data = fs::read_to_string(args.plan).unwrap();
 
-    let plan = read_plan(args.plan).unwrap();
+    let plan: Plan = serde_json::from_str(&data).unwrap();
     if args.debug > 1 { println!("{:?}", plan); }
 
     let wf = Workflow::new(&plan);
     if args.debug > 1 { println!("{:?}", wf); }
 
     wf.run(args.debug).await.unwrap()
-}
-
-fn read_plan<P>(path: P) -> Result<plan::Plan, Box<dyn Error>>
-    where P: AsRef<Path>
-{
-    let file = File::open(path)?;
-    let reader = BufReader::new(file);
-    let plan = serde_json::from_reader(reader)?;
-
-    Ok(plan)
 }

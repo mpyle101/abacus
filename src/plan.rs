@@ -1,13 +1,14 @@
+use std::borrow::Cow;
 use std::collections::HashMap;
 use datafusion::arrow::datatypes::{DataType, TimeUnit};
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
-pub struct Plan {
-    pub id: String,
-    pub name: String,
-    pub links: Vec<Link>,
-    pub tools: Vec<Tool>,
+pub struct Plan<'a> {
+    pub id: &'a str,
+    pub name: &'a str,
+    pub links: Vec<Link<'a>>,
+    pub tools: Vec<Tool<'a>>,
 }
 
 #[derive(Clone, Copy, Debug, Deserialize)]
@@ -21,9 +22,9 @@ impl Default for InputSide {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct Link {
-    pub src: String,
-    pub dst: String,
+pub struct Link<'a> {
+    pub src: &'a str,
+    pub dst: &'a str,
 
     #[serde(default)]
     pub input: InputSide,
@@ -32,31 +33,31 @@ pub struct Link {
 #[derive(Debug, Deserialize)]
 #[serde(tag="tool")]
 #[allow(non_camel_case_types)]
-pub enum Tool {
-    import(Import),
-    export(Export),
-    distinct(Generic),
-    difference(Generic),
-    intersect(Generic),
-    join(Join),
-    select(Select),
-    union(Union)
+pub enum Tool<'a> {
+    #[serde(borrow)]
+    import(Import<'a>),
+    export(Export<'a>),
+    distinct(Generic<'a>),
+    difference(Generic<'a>),
+    intersect(Generic<'a>),
+    join(Join<'a>),
+    select(Select<'a>),
+    union(Union<'a>)
 }
-
-impl Tool {
-    pub fn id(&self) -> String
+impl<'a> Tool<'a> {
+    pub fn id(&self) -> &'a str
     {
         use Tool::*;
 
         match self {
             import(tool)     => tool.id(),
             export(tool)     => tool.id(),
-            distinct(tool)   => tool.id.clone(),
-            difference(tool) => tool.id.clone(),
-            intersect(tool)  => tool.id.clone(),
-            join(tool)       => tool.id.clone(),
-            select(tool)     => tool.id.clone(),
-            union(tool)      => tool.id.clone(),
+            distinct(tool)   => tool.id,
+            difference(tool) => tool.id,
+            intersect(tool)  => tool.id,
+            join(tool)       => tool.id,
+            select(tool)     => tool.id,
+            union(tool)      => tool.id,
         }
     }
 }
@@ -64,26 +65,24 @@ impl Tool {
 #[derive(Debug, Deserialize)]
 #[serde(tag="format")]
 #[allow(non_camel_case_types)]
-pub enum Import {
-    csv(ImportCsv),
-    avro(ImportAvro),
-    parquet(ImportParquet),
+pub enum Import<'a> {
+    #[serde(borrow)]
+    csv(ImportCsv<'a>),
+    avro(ImportAvro<'a>),
+    parquet(ImportParquet<'a>),
 }
-
-impl Import {
-    pub fn id(&self) -> String
+impl<'a> Import<'a> {
+    pub fn id(&self) -> &'a str
     {
-        use Import::*;
-
         match self {
-            csv(tool)     => tool.id.clone(),
-            avro(tool)    => tool.id.clone(),
-            parquet(tool) => tool.id.clone(),
+            Import::csv(tool)     => tool.id,
+            Import::avro(tool)    => tool.id,
+            Import::parquet(tool) => tool.id,
         }
     }
 }
 
-#[derive(Clone, Debug, Deserialize)]
+#[derive(Clone, Copy, Debug, Deserialize)]
 #[allow(non_camel_case_types)]
 pub enum SchemaDataType {
     utf8, bool, null, ts, ms, ns,
@@ -118,8 +117,8 @@ impl Into<DataType> for SchemaDataType {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct SchemaField {
-    pub column: String,
+pub struct SchemaField<'a> {
+    pub column: &'a str,
     pub nullable: Option<bool>,
 
     #[serde(rename(deserialize = "type"))]
@@ -127,78 +126,76 @@ pub struct SchemaField {
 }
 
 #[derive(Clone, Debug, Deserialize)]
-pub struct Sql {
-    pub stmt: String,
-    pub table: String,
+pub struct Sql<'a> {
+    pub stmt: Cow<'a, str>,
+    pub table: &'a str,
 }
 
 #[derive(Debug, Deserialize)]
-pub struct ImportCsv {
-    pub id: String,
-    pub path: String,
+pub struct ImportCsv<'a> {
+    pub id: &'a str,
+    pub path: &'a str,
     pub limit: Option<usize>,
     pub header: Option<bool>,
     pub delimiter: Option<u8>,
-    pub schema: Option<Vec<SchemaField>>,
-    pub sql: Option<Sql>,
+    pub schema: Option<Vec<SchemaField<'a>>>,
+    pub sql: Option<Sql<'a>>,
 }
 
 #[derive(Debug, Deserialize)]
-pub struct ImportAvro {
-    pub id: String,
-    pub path: String,
+pub struct ImportAvro<'a> {
+    pub id: &'a str,
+    pub path: &'a str,
     pub limit: Option<usize>,
-    pub sql: Option<Sql>,
+    pub sql: Option<Sql<'a>>,
 }
 
 #[derive(Debug, Deserialize)]
-pub struct ImportParquet {
-    pub id: String,
-    pub path: String,
+pub struct ImportParquet<'a> {
+    pub id: &'a str,
+    pub path: &'a str,
     pub limit: Option<usize>,
-    pub sql: Option<Sql>,
+    pub sql: Option<Sql<'a>>,
 }
 
 #[derive(Debug, Deserialize)]
 #[serde(tag="format")]
 #[allow(non_camel_case_types)]
-pub enum Export {
-    csv(ExportCsv),
-    json(ExportJson),
-    parquet(ExportParquet),
+pub enum Export<'a> {
+    #[serde(borrow)]
+    csv(ExportCsv<'a>),
+    json(ExportJson<'a>),
+    parquet(ExportParquet<'a>),
 }
-
-impl Export {
-    pub fn id(&self) -> String
+impl<'a> Export<'a> {
+    pub fn id(&self) -> &'a str
     {
-        use Export::*;
-
         match self {
-            csv(tool)     => tool.id.clone(),
-            json(tool)    => tool.id.clone(),
-            parquet(tool) => tool.id.clone(),
+            Export::csv(tool)     => tool.id,
+            Export::json(tool)    => tool.id,
+            Export::parquet(tool) => tool.id,
         }
     }
 }
 
 #[derive(Debug, Deserialize)]
-pub struct ExportCsv {
-    pub id: String,
-    pub path: String,
+pub struct ExportCsv<'a> {
+    pub id: &'a str,
+    pub path: &'a str,
     pub overwrite: Option<bool>,
 }
 
 #[derive(Debug, Deserialize)]
-pub struct ExportJson {
-    pub id: String,
-    pub path: String,
+pub struct ExportJson<'a> {
+    pub id: &'a str,
+    pub path: &'a str,
     pub overwrite: Option<bool>,
 }
 
 #[derive(Debug, Deserialize)]
-pub struct ExportParquet {
-    pub id: String,
-    pub path: String,
+pub struct ExportParquet<'a> {
+    pub id: &'a str,
+    pub path: &'a str,
     pub overwrite: Option<bool>,
 }
 
@@ -216,29 +213,29 @@ pub enum JoinType {
 }
 
 #[derive(Clone, Debug, Deserialize)]
-pub struct Generic {
-    pub id: String,
+pub struct Generic<'a> {
+    pub id: &'a str,
 }
 
 #[derive(Debug, Deserialize)]
-pub struct Join {
-    pub id: String,
-    pub lt: Vec<String>,
-    pub rt: Vec<String>,
+pub struct Join<'a> {
+    pub id: &'a str,
+    pub lt: Vec<&'a str>,
+    pub rt: Vec<&'a str>,
 
     #[serde(rename(deserialize = "type"))]
     pub variant: JoinType,
 }
 
 #[derive(Clone, Debug, Deserialize)]
-pub struct Select {
-    pub id: String,
-    pub columns: Vec<String>,
-    pub aliases: HashMap<String, String>,
+pub struct Select<'a> {
+    pub id: &'a str,
+    pub columns: Vec<&'a str>,
+    pub aliases: HashMap<&'a str, &'a str>,
 }
 
 #[derive(Clone, Debug, Deserialize)]
-pub struct Union {
-    pub id: String,
+pub struct Union<'a> {
+    pub id: &'a str,
     pub distinct: Option<bool>,
 }

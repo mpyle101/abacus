@@ -14,7 +14,6 @@ pub struct Tool {
     id: String,
     action: Action,
 }
-
 impl Tool {
     pub fn new(plan: &plan::Tool) -> Tool
     {
@@ -22,25 +21,25 @@ impl Tool {
 
         let id = plan.id();
         let action = match plan {
-            distinct(_)   => Action::Distinct,
-            difference(_) => Action::Difference,
-            intersect(_)  => Action::Intersect,
-            join(conf)    => Action::Join(JoinConfig::new(conf)),
-            select(conf)  => Action::Select(SelectConfig::new(conf)),
-            union(conf)   => Action::Union(UnionConfig::new(conf)),
+            distinct(_)    => Action::Distinct,
+            difference(_)  => Action::Difference,
+            intersect(_)   => Action::Intersect,
+            join(config)   => Action::Join(JoinConfig::new(config)),
+            select(config) => Action::Select(SelectConfig::new(config)),
+            union(config)  => Action::Union(UnionConfig::new(config)),
             import(format) => match format {
-                Import::csv(conf)     => Action::ImportCsv(CsvImportConfig::new(conf)),
-                Import::avro(conf)    => Action::ImportAvro(AvroImportConfig::new(conf)),
-                Import::parquet(conf) => Action::ImportParquet(ParquetImportConfig::new(conf)),
+                Import::csv(config)     => Action::ImportCsv(CsvImportConfig::new(config)),
+                Import::avro(config)    => Action::ImportAvro(AvroImportConfig::new(config)),
+                Import::parquet(config) => Action::ImportParquet(ParquetImportConfig::new(config)),
             },
             export(format) => match format {
-                Export::csv(conf)     => Action::ExportCsv(CsvExportConfig::new(conf)),
-                Export::json(conf)    => Action::ExportJson(JsonExportConfig::new(conf)),
-                Export::parquet(conf) => Action::ExportParquet(ParquetExportConfig::new(conf)),
+                Export::csv(config)     => Action::ExportCsv(CsvExportConfig::new(config)),
+                Export::json(config)    => Action::ExportJson(JsonExportConfig::new(config)),
+                Export::parquet(config) => Action::ExportParquet(ParquetExportConfig::new(config)),
             },
         };
 
-        Tool { id, action }
+        Tool { action, id: id.to_string() }
     }
 
     pub fn is_async(&self) -> bool
@@ -88,7 +87,6 @@ pub enum Action {
     ExportJson(JsonExportConfig),
     ExportParquet(ParquetExportConfig),
 }
-
 impl Action {
     fn frames(&self) -> i8
     {
