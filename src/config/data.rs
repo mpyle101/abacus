@@ -1,7 +1,15 @@
 use std::collections::HashMap;
-use datafusion::prelude::JoinType;
+use std::convert::From;
+use datafusion::prelude::*;
 
-use crate::plans::{Filter, Join, JoinType as ConfigJoinType, Select, Union};
+use crate::plans::{
+    self,
+    Expression,
+    Filter,
+    Join,
+    Select,
+    Union
+};
 
 #[derive(Clone, Debug)]
 pub struct JoinConfig {
@@ -9,10 +17,10 @@ pub struct JoinConfig {
     pub left_cols: Vec<String>,
     pub right_cols: Vec<String>,
 }
-impl JoinConfig {
-    pub fn new(config: &Join) -> JoinConfig
+impl From<&Join<'_>> for JoinConfig {
+    fn from(config: &Join) -> JoinConfig
     {
-        use ConfigJoinType::*;
+        use plans::JoinType::*;
 
         let join_type = match config.variant {
             full       => JoinType::Full,
@@ -41,8 +49,8 @@ pub struct SelectConfig {
     pub columns: Vec<String>,
     pub aliases: HashMap<String, String>,
 }
-impl SelectConfig {
-    pub fn new(config: &Select) -> SelectConfig
+impl From<&Select<'_>> for SelectConfig {
+    fn from(config: &Select) -> SelectConfig
     {
         let aliases = config.aliases.iter()
             .map(|(k, v)| (k.to_string(), v.to_string()))
@@ -59,8 +67,8 @@ impl SelectConfig {
 pub struct UnionConfig {
     pub distinct: bool,
 }
-impl UnionConfig {
-    pub fn new(config: &Union) -> UnionConfig
+impl From<&Union<'_>> for UnionConfig {
+    fn from(config: &Union) -> UnionConfig
     {
         UnionConfig { distinct: config.distinct.unwrap_or(false) }
     }
@@ -68,11 +76,89 @@ impl UnionConfig {
 
 #[derive(Clone, Debug)]
 pub struct FilterConfig {
-    pub expr: bool,
+    pub expr: Expr,
 }
 impl FilterConfig {
-    pub fn new(_config: &Filter) -> FilterConfig
+    pub fn new(config: &Filter) -> FilterConfig
     {
-        FilterConfig { expr: false }
+        FilterConfig { expr: convert(&config.expr) }
+    }
+
+}
+
+fn convert(expr: &Expression) -> Expr
+{
+    match expr {
+        Expression::col(v)     => col(*v),
+        Expression::f32(v)     => lit(*v),
+        Expression::i32(v)     => lit(*v),
+        Expression::abs(expr)  => abs(convert(expr)),
+        Expression::avg(expr)  => avg(convert(expr)),
+        Expression::acos(expr) => acos(convert(expr)),
+        Expression::asin(expr) => atan(convert(expr)),
+        Expression::atan(expr) => atan(convert(expr)),
+        Expression::not(expr)  => convert(expr).not(),
+        Expression::max(exprs) => max(array(exprs.iter().map(convert).collect())),
+        Expression::min(exprs) => min(array(exprs.iter().map(convert).collect())),
+        Expression::sum(exprs) => sum(array(exprs.iter().map(convert).collect())),
+        Expression::gt(exprs)  => {
+            let left  = convert(&exprs[0]);
+            let right = convert(&exprs[1]);
+            left.gt(right)
+        },
+        Expression::gte(exprs) => {
+            let left  = convert(&exprs[0]);
+            let right = convert(&exprs[1]);
+            left.gt_eq(right)
+        },
+        Expression::lt(exprs) => {
+            let left  = convert(&exprs[0]);
+            let right = convert(&exprs[1]);
+            left.lt(right)
+        },
+        Expression::lte(exprs) => {
+            let left  = convert(&exprs[0]);
+            let right = convert(&exprs[1]);
+            left.lt_eq(right)
+        },
+        Expression::and(exprs) => {
+            exprs.iter()
+                .map(convert)
+                .reduce(|expr, e| expr.and(e))
+                .unwrap()
+        },
+        Expression::or(exprs) => {
+            exprs.iter()
+                .map(convert)
+                .reduce(|expr, e| expr.or(e))
+                .unwrap()
+        },
+        Expression::add(exprs) => {
+            let left  = convert(&exprs[0]);
+            let right = convert(&exprs[1]);
+            left + right
+        },
+        Expression::sub(exprs) => {
+            let left  = convert(&exprs[0]);
+            let right = convert(&exprs[1]);
+            left - right
+        },
+        Expression::mul(exprs) => {
+            let left  = convert(&exprs[0]);
+            let right = convert(&exprs[1]);
+            left * right
+        },
+        Expression::modulus(exprs) => {
+            let left  = convert(&exprs[0]);
+            let right = convert(&exprs[1]);
+            left.modulus(right)
+        },
+        Expression::product(exprs) => {
+            exprs.iter()
+                .map(convert)
+                .reduce(|expr, e| expr * e)
+                .unwrap()
+        },
+
     }
 }

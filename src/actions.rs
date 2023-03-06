@@ -139,11 +139,11 @@ pub fn intersect(data: &mut Data) -> Result<Option<DataFrame>>
     Ok(Some(left.intersect(right)?))
 }
 
-pub fn filter(data: &mut Data, _config: &FilterConfig) -> Result<Option<DataFrame>>
+pub fn filter(data: &mut Data, config: &FilterConfig) -> Result<Option<DataFrame>>
 {
     let df = data.left.take().unwrap();
 
-    Ok(Some(df.distinct()?))
+    Ok(Some(df.filter(config.expr.clone())?))
 }
 
 pub fn join(data: &mut Data, config: &JoinConfig) -> Result<Option<DataFrame>>

@@ -25,18 +25,18 @@ impl Tool {
             difference(_)  => Action::Difference,
             intersect(_)   => Action::Intersect,
             filter(config) => Action::Filter(FilterConfig::new(config)),
-            join(config)   => Action::Join(JoinConfig::new(config)),
-            select(config) => Action::Select(SelectConfig::new(config)),
-            union(config)  => Action::Union(UnionConfig::new(config)),
+            join(config)   => Action::Join(config.into()),
+            select(config) => Action::Select(config.into()),
+            union(config)  => Action::Union(config.into()),
             import(format) => match format {
-                Import::csv(config)     => Action::ImportCsv(CsvImportConfig::new(config)),
-                Import::avro(config)    => Action::ImportAvro(AvroImportConfig::new(config)),
-                Import::parquet(config) => Action::ImportParquet(ParquetImportConfig::new(config)),
+                Import::csv(config)     => Action::ImportCsv(config.into()),
+                Import::avro(config)    => Action::ImportAvro(config.into()),
+                Import::parquet(config) => Action::ImportParquet(config.into()),
             },
             export(format) => match format {
-                Export::csv(config)     => Action::ExportCsv(CsvExportConfig::new(config)),
-                Export::json(config)    => Action::ExportJson(JsonExportConfig::new(config)),
-                Export::parquet(config) => Action::ExportParquet(ParquetExportConfig::new(config)),
+                Export::csv(config)     => Action::ExportCsv(config.into()),
+                Export::json(config)    => Action::ExportJson(config.into()),
+                Export::parquet(config) => Action::ExportParquet(config.into()),
             },
         };
 

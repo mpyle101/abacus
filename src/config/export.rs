@@ -1,3 +1,4 @@
+use std::convert::From;
 use crate::plans::{ExportCsv, ExportJson, ExportParquet};
 
 #[derive(Clone, Debug)]
@@ -5,8 +6,8 @@ pub struct CsvExportConfig {
     pub path: String,
     pub overwrite: bool,
 }
-impl CsvExportConfig {
-    pub fn new(config: &ExportCsv) -> CsvExportConfig
+impl From<&ExportCsv<'_>> for CsvExportConfig {
+    fn from(config: &ExportCsv) -> CsvExportConfig
     {
         CsvExportConfig {
             path: config.path.to_string(),
@@ -20,8 +21,8 @@ pub struct JsonExportConfig {
     pub path: String,
     pub overwrite: bool,
 }
-impl JsonExportConfig {
-    pub fn new(config: &ExportJson) -> JsonExportConfig
+impl From<&ExportJson<'_>> for JsonExportConfig {
+    fn from(config: &ExportJson) -> JsonExportConfig
     {
         JsonExportConfig {
             path: config.path.to_string(),
@@ -35,8 +36,8 @@ pub struct ParquetExportConfig {
     pub path: String,
     pub overwrite: bool,
 }
-impl ParquetExportConfig {
-    pub fn new(config: &ExportParquet) -> ParquetExportConfig
+impl From<&ExportParquet<'_>> for ParquetExportConfig {
+    fn from(config: &ExportParquet) -> ParquetExportConfig
     {
         ParquetExportConfig {
             path: config.path.to_string(),

@@ -209,7 +209,7 @@ pub struct Generic<'a> {
 #[derive(Debug, Deserialize)]
 pub struct Filter<'a> {
     pub id: &'a str,
-    pub expr: serde_json::Value,
+    pub expr: Expression<'a>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -246,4 +246,34 @@ pub enum JoinType {
     right_semi,
     left_anti,
     right_anti,
+}
+
+#[derive(Debug, Deserialize)]
+#[allow(non_camel_case_types)]
+pub enum Expression<'a> {
+    col(&'a str),
+    f32(f32),
+    i32(i32),
+    abs(Box<Expression<'a>>),
+    avg(Box<Expression<'a>>),
+    acos(Box<Expression<'a>>),
+    asin(Box<Expression<'a>>),
+    atan(Box<Expression<'a>>),
+    and(Vec<Expression<'a>>),
+    or(Vec<Expression<'a>>),
+    not(Box<Expression<'a>>),
+    gt(Box<[Expression<'a>;2]>),
+    gte(Box<[Expression<'a>;2]>),
+    lt(Box<[Expression<'a>;2]>),
+    lte(Box<[Expression<'a>;2]>),
+    max(Vec<Expression<'a>>),
+    min(Vec<Expression<'a>>),
+    sum(Vec<Expression<'a>>),
+    add(Box<[Expression<'a>;2]>),
+    sub(Box<[Expression<'a>;2]>),
+    mul(Box<[Expression<'a>;2]>),
+    product(Vec<Expression<'a>>),
+
+    #[serde(rename(deserialize = "mod"))]
+    modulus(Box<[Expression<'a>;2]>)
 }
