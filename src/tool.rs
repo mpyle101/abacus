@@ -24,8 +24,9 @@ impl Tool {
             distinct(_)    => Action::Distinct,
             difference(_)  => Action::Difference,
             intersect(_)   => Action::Intersect,
-            filter(config) => Action::Filter(FilterConfig::new(config)),
+            filter(config) => Action::Filter(config.into()),
             join(config)   => Action::Join(config.into()),
+            map(config)    => Action::Map(config.into()),
             select(config) => Action::Select(config.into()),
             union(config)  => Action::Union(config.into()),
             import(format) => match format {
@@ -76,6 +77,7 @@ pub enum Action {
     Intersect,
     Filter(FilterConfig),
     Join(JoinConfig),
+    Map(MapConfig),
     Select(SelectConfig),
     Union(UnionConfig),
 
@@ -95,7 +97,7 @@ impl Action {
         use Action::*;
 
         match self {
-            Distinct | Filter(_) | Select(_) => 1,
+            Distinct | Filter(_) | Map(_) | Select(_) => 1,
             Difference | Intersect | Join(_) | Union(_) => 2,
             ImportCsv(_) | ImportAvro(_) | ImportParquet(_) => 0,
             ExportCsv(_) | ExportJson(_) | ExportParquet(_) => 1,
@@ -108,7 +110,8 @@ impl Action {
 
         match self {
             Distinct | Difference | Intersect
-                | Filter(_) | Join(_) | Select(_) | Union(_) => false,
+                | Filter(_) | Join(_) | Map(_)
+                | Select(_) | Union(_) => false,
             ImportCsv(_) | ImportAvro(_) | ImportParquet(_) => true,
             ExportCsv(_) | ExportJson(_) | ExportParquet(_) => true
         }

@@ -7,6 +7,7 @@ use crate::plans::{
     Expression,
     Filter,
     Join,
+    Map,
     Select,
     Union
 };
@@ -78,12 +79,23 @@ impl From<&Union<'_>> for UnionConfig {
 pub struct FilterConfig {
     pub expr: Expr,
 }
-impl FilterConfig {
-    pub fn new(config: &Filter) -> FilterConfig
+impl From<&Filter<'_>> for FilterConfig {
+    fn from(config: &Filter) -> FilterConfig
     {
         FilterConfig { expr: convert(&config.expr) }
     }
 
+}
+
+#[derive(Clone, Debug)]
+pub struct MapConfig {
+    pub exprs: Vec<Expr>,
+}
+impl From<&Map<'_>> for MapConfig {
+    fn from(config: &Map) -> MapConfig
+    {
+        MapConfig { exprs: config.exprs.iter().map(convert).collect() }
+    }
 }
 
 fn convert(expr: &Expression) -> Expr

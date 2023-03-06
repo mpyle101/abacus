@@ -37,11 +37,12 @@ pub enum Tool<'a> {
     #[serde(borrow)]
     import(Import<'a>),
     export(Export<'a>),
-    filter(Filter<'a>),
     distinct(Generic<'a>),
     difference(Generic<'a>),
+    filter(Filter<'a>),
     intersect(Generic<'a>),
     join(Join<'a>),
+    map(Map<'a>),
     select(Select<'a>),
     union(Union<'a>),
 }
@@ -53,11 +54,12 @@ impl<'a> Tool<'a> {
         match self {
             import(tool)     => tool.id(),
             export(tool)     => tool.id(),
-            filter(tool)     => tool.id,
             distinct(tool)   => tool.id,
             difference(tool) => tool.id,
+            filter(tool)     => tool.id,
             intersect(tool)  => tool.id,
             join(tool)       => tool.id,
+            map(tool)        => tool.id,
             select(tool)     => tool.id,
             union(tool)      => tool.id,
         }
@@ -227,6 +229,12 @@ pub struct Select<'a> {
     pub id: &'a str,
     pub columns: Vec<&'a str>,
     pub aliases: HashMap<&'a str, &'a str>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct Map<'a> {
+    pub id: &'a str,
+    pub exprs: Vec<Expression<'a>>,
 }
 
 #[derive(Debug, Deserialize)]
