@@ -1,6 +1,6 @@
 mod actions;
 mod config;
-mod plan;
+mod plans;
 mod tool;
 mod workflow;
 
@@ -8,7 +8,7 @@ use std::fs;
 use std::path::PathBuf;
 
 use clap::Parser;
-use plan::Plan;
+use plans::Plan;
 use workflow::Workflow;
 
 #[derive(Parser)]

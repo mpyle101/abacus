@@ -1,4 +1,4 @@
-use crate::plan::{ExportCsv, ExportJson, ExportParquet};
+use crate::plans::{ExportCsv, ExportJson, ExportParquet};
 
 #[derive(Clone, Debug)]
 pub struct CsvExportConfig {

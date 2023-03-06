@@ -37,12 +37,13 @@ pub enum Tool<'a> {
     #[serde(borrow)]
     import(Import<'a>),
     export(Export<'a>),
+    filter(Filter<'a>),
     distinct(Generic<'a>),
     difference(Generic<'a>),
     intersect(Generic<'a>),
     join(Join<'a>),
     select(Select<'a>),
-    union(Union<'a>)
+    union(Union<'a>),
 }
 impl<'a> Tool<'a> {
     pub fn id(&self) -> &'a str
@@ -52,6 +53,7 @@ impl<'a> Tool<'a> {
         match self {
             import(tool)     => tool.id(),
             export(tool)     => tool.id(),
+            filter(tool)     => tool.id,
             distinct(tool)   => tool.id,
             difference(tool) => tool.id,
             intersect(tool)  => tool.id,
@@ -200,21 +202,14 @@ pub struct ExportParquet<'a> {
 }
 
 #[derive(Debug, Deserialize)]
-#[allow(non_camel_case_types)]
-pub enum JoinType {
-    inner,
-    left,
-    right,
-    full,
-    left_semi,
-    right_semi,
-    left_anti,
-    right_anti,
-}
-
-#[derive(Clone, Debug, Deserialize)]
 pub struct Generic<'a> {
     pub id: &'a str,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct Filter<'a> {
+    pub id: &'a str,
+    pub expr: serde_json::Value,
 }
 
 #[derive(Debug, Deserialize)]
@@ -227,15 +222,28 @@ pub struct Join<'a> {
     pub variant: JoinType,
 }
 
-#[derive(Clone, Debug, Deserialize)]
+#[derive(Debug, Deserialize)]
 pub struct Select<'a> {
     pub id: &'a str,
     pub columns: Vec<&'a str>,
     pub aliases: HashMap<&'a str, &'a str>,
 }
 
-#[derive(Clone, Debug, Deserialize)]
+#[derive(Debug, Deserialize)]
 pub struct Union<'a> {
     pub id: &'a str,
     pub distinct: Option<bool>,
+}
+
+#[derive(Debug, Deserialize)]
+#[allow(non_camel_case_types)]
+pub enum JoinType {
+    inner,
+    left,
+    right,
+    full,
+    left_semi,
+    right_semi,
+    left_anti,
+    right_anti,
 }

@@ -7,7 +7,7 @@ use datafusion::execution::options::{AvroReadOptions, CsvReadOptions, ParquetRea
 use datafusion::prelude::{col, DataFrame};
 
 use crate::config::*;
-use crate::plan::InputSide;
+use crate::plans::InputSide;
 
 #[derive(Clone, Debug, Default)]
 pub struct Data {
@@ -137,6 +137,13 @@ pub fn intersect(data: &mut Data) -> Result<Option<DataFrame>>
     let right = data.right.take().unwrap();
 
     Ok(Some(left.intersect(right)?))
+}
+
+pub fn filter(data: &mut Data, _config: &FilterConfig) -> Result<Option<DataFrame>>
+{
+    let df = data.left.take().unwrap();
+
+    Ok(Some(df.distinct()?))
 }
 
 pub fn join(data: &mut Data, config: &JoinConfig) -> Result<Option<DataFrame>>

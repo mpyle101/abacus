@@ -1,4 +1,4 @@
-use crate::plan::{ImportAvro, ImportCsv, ImportParquet, Sql};
+use crate::plans::{ImportAvro, ImportCsv, ImportParquet, Sql};
 use datafusion::arrow::datatypes::Field;
 
 #[derive(Clone, Debug)]

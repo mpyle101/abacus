@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use datafusion::prelude::JoinType;
 
-use crate::plan::{Join, JoinType as ConfigJoinType, Select, Union};
+use crate::plans::{Filter, Join, JoinType as ConfigJoinType, Select, Union};
 
 #[derive(Clone, Debug)]
 pub struct JoinConfig {
@@ -63,5 +63,16 @@ impl UnionConfig {
     pub fn new(config: &Union) -> UnionConfig
     {
         UnionConfig { distinct: config.distinct.unwrap_or(false) }
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct FilterConfig {
+    pub expr: bool,
+}
+impl FilterConfig {
+    pub fn new(_config: &Filter) -> FilterConfig
+    {
+        FilterConfig { expr: false }
     }
 }

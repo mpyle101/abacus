@@ -4,10 +4,10 @@
         { "id": "01", "tool": "join", "type": "inner", "lt": ["a1", "b1"], "rt": ["a2", "b2"] },
         { "id": "02", "tool": "input", "format": "csv", "path": "./example.csv", "query": "SELECT a, MIN(b) FROM example GROUP BY a LIMIT 100" },
         { "id": "03", "tool": "project", "exprs": [
-            {"add": [{"col": "a"}, {"col": "b"}, {"num": 2.5}], "alias": "d"},
+            {"add": [{"col": "a"}, {"col": "b"}, {"f32": 2.5}], "alias": "d"},
             {"col": "c"}
         ]},
-        { "id": "04", "tool": "aggregate", "group_by": ["a"], "expr": [{"min":"b"}]},
+        { "id": "04", "tool": "aggregate", "group_by": ["a"], "expr": [{"min":[{"col": "b"}]}]},
         { "id": "05", "tool": "merge", "distinct": true },
         { "id": "07", "tool": "sort", "cols": [
             { "col": "a", "asc": true },
@@ -15,7 +15,7 @@
         ]},
         { "id": "08", "tool": "filter", "expr": {"and": [
             {"lte":[{"col": "a"}, {"col": "b"}]},
-            {"gt":[{"col": "a"}, {"num": 42}]}
+            {"gt":[{"col": "a"}, {"i32": 42}]}
         ]}},
         { "id": "09", "tool": "select", "cols": ["a", "b"] },
         { "id": "10", "tool": "intersect", "cols": ["b", "c"] },

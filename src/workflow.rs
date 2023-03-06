@@ -9,7 +9,7 @@ use petgraph::visit::EdgeRef;
 use petgraph::graph::{Graph, NodeIndex};
 use tokio::task::JoinSet;
 
-use crate::plan::{self, InputSide, Plan};
+use crate::plans::{self, InputSide, Plan};
 use crate::tool::{Tool, ToolData};
 
 type WorkflowGraph = Graph<Tool, InputSide>;
@@ -33,7 +33,7 @@ impl Workflow {
             .map(|schema| {
                 let tool = Tool::new(schema);
                 let node = tools.add_node(tool);
-                if let plan::Tool::import(..) = schema {
+                if let plans::Tool::import(..) = schema {
                     inputs.push(node);
                 }
 
