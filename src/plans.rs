@@ -1,7 +1,5 @@
 use std::borrow::Cow;
 use std::collections::HashMap;
-use std::convert::TryFrom;
-
 use datafusion::arrow::datatypes::{DataType, TimeUnit};
 use datafusion::parquet::basic::Compression;
 use serde::Deserialize;
@@ -172,37 +170,28 @@ pub struct Sql<'a> {
 #[derive(Debug, Deserialize)]
 pub struct ImportCsv<'a> {
     pub id: &'a str,
-    pub url: Url,
-    pub delimiter: Option<u8>,
-    pub header: Option<bool>,
+    pub path: &'a str,
     pub limit: Option<usize>,
+    pub header: Option<bool>,
+    pub delimiter: Option<u8>,
     pub schema: Option<Vec<SchemaField<'a>>>,
     pub sql: Option<Sql<'a>>,
-}
-impl<'a> ImportCsv<'a> {
-    pub fn url(&self) -> url::Url { self.url.0.clone() }
 }
 
 #[derive(Debug, Deserialize)]
 pub struct ImportAvro<'a> {
     pub id: &'a str,
-    pub url: Url,
+    pub path: &'a str,
     pub limit: Option<usize>,
     pub sql: Option<Sql<'a>>,
-}
-impl<'a> ImportAvro<'a> {
-    pub fn url(&self) -> url::Url { self.url.0.clone() }
 }
 
 #[derive(Debug, Deserialize)]
 pub struct ImportParquet<'a> {
     pub id: &'a str,
-    pub url: Url,
+    pub path: &'a str,
     pub limit: Option<usize>,
     pub sql: Option<Sql<'a>>,
-}
-impl<'a> ImportParquet<'a> {
-    pub fn url(&self) -> url::Url { self.url.0.clone() }
 }
 
 #[derive(Debug, Deserialize)]
@@ -228,32 +217,23 @@ impl<'a> Export<'a> {
 #[derive(Debug, Deserialize)]
 pub struct ExportCsv<'a> {
     pub id: &'a str,
-    pub url: Url,
+    pub path: &'a str,
     pub overwrite: Option<bool>,
-}
-impl<'a> ExportCsv<'a> {
-    pub fn url(&self) -> url::Url { self.url.0.clone() }
 }
 
 #[derive(Debug, Deserialize)]
 pub struct ExportJson<'a> {
     pub id: &'a str,
-    pub url: Url,
+    pub path: &'a str,
     pub overwrite: Option<bool>,
-}
-impl<'a> ExportJson<'a> {
-    pub fn url(&self) -> url::Url { self.url.0.clone() }
 }
 
 #[derive(Debug, Deserialize)]
 pub struct ExportParquet<'a> {
     pub id: &'a str,
-    pub url: Url,
+    pub path: &'a str,
     pub compress: Option<ParquetCompression>,
     pub overwrite: Option<bool>,
-}
-impl<'a> ExportParquet<'a> {
-    pub fn url(&self) -> url::Url { self.url.0.clone() }
 }
 
 #[derive(Debug, Deserialize)]
@@ -352,20 +332,4 @@ pub enum Expression<'a> {
 
     #[serde(rename(deserialize = "mod"))]
     modulus(Box<[Expression<'a>;2]>)
-}
-
-#[derive(Debug, Deserialize)]
-struct UrlString<'a>(&'a str);
-
-#[derive(Debug, Deserialize)]
-#[serde(try_from = "UrlString")]
-pub struct Url(url::Url);
-
-impl TryFrom<UrlString<'_>> for Url {
-    type Error = url::ParseError;
-
-    fn try_from(other: UrlString) -> Result<Self, Self::Error>
-    {
-        Ok(Url(url::Url::parse(other.0)?))
-    }
 }

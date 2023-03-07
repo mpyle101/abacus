@@ -1,8 +1,6 @@
 use std::convert::From;
-
-use datafusion::arrow::datatypes::Field;
-
 use crate::plans::{ImportAvro, ImportCsv, ImportParquet, Sql};
+use datafusion::arrow::datatypes::Field;
 
 #[derive(Clone, Debug)]
 pub struct SqlConfig {
@@ -18,7 +16,7 @@ impl From<&Sql<'_>> for SqlConfig {
 
 #[derive(Clone, Debug)]
 pub struct CsvImportConfig {
-    pub url: url::Url,
+    pub path: String,
     pub header: bool,
     pub delimiter: u8,
     pub sql: Option<SqlConfig>,
@@ -39,7 +37,7 @@ impl From<&ImportCsv<'_>> for CsvImportConfig {
 
         CsvImportConfig {
             fields,
-            url: config.url(),
+            path: config.path.into(),
             sql: config.sql.as_ref().map(|conf| conf.into()),
             limit: config.limit,
             header: config.header.unwrap_or(false), 
@@ -50,15 +48,15 @@ impl From<&ImportCsv<'_>> for CsvImportConfig {
 
 #[derive(Clone, Debug)]
 pub struct AvroImportConfig {
-    pub url: url::Url,
+    pub path: String,
     pub sql: Option<SqlConfig>,
     pub limit: Option<usize>,
 }
 impl From<&ImportAvro<'_>> for AvroImportConfig {
-    fn from(config: &ImportAvro) -> Self
+    fn from(config: &ImportAvro) -> AvroImportConfig
     {
         AvroImportConfig {
-            url: config.url(),
+            path: config.path.into(),
             sql: config.sql.as_ref().map(|conf| conf.into()),
             limit: config.limit
         }
@@ -67,15 +65,15 @@ impl From<&ImportAvro<'_>> for AvroImportConfig {
 
 #[derive(Clone, Debug)]
 pub struct ParquetImportConfig {
-    pub url: url::Url,
+    pub path: String,
     pub sql: Option<SqlConfig>,
     pub limit: Option<usize>,
 }
 impl From<&ImportParquet<'_>> for ParquetImportConfig {
-    fn from(config: &ImportParquet) -> Self
+    fn from(config: &ImportParquet) -> ParquetImportConfig
     {
         ParquetImportConfig {
-            url: config.url(),
+            path: config.path.into(),
             sql: config.sql.as_ref().map(|conf| conf.into()),
             limit: config.limit
         }
