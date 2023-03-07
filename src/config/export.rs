@@ -10,7 +10,7 @@ impl From<&ExportCsv<'_>> for CsvExportConfig {
     fn from(config: &ExportCsv) -> CsvExportConfig
     {
         CsvExportConfig {
-            path: config.path.to_string(),
+            path: config.path.into(),
             overwrite: config.overwrite.unwrap_or(false),
         }
     }
@@ -25,7 +25,7 @@ impl From<&ExportJson<'_>> for JsonExportConfig {
     fn from(config: &ExportJson) -> JsonExportConfig
     {
         JsonExportConfig {
-            path: config.path.to_string(),
+            path: config.path.into(),
             overwrite: config.overwrite.unwrap_or(false),
         }
     }
@@ -40,7 +40,7 @@ impl From<&ExportParquet<'_>> for ParquetExportConfig {
     fn from(config: &ExportParquet) -> ParquetExportConfig
     {
         ParquetExportConfig {
-            path: config.path.to_string(),
+            path: config.path.into(),
             overwrite: config.overwrite.unwrap_or(false),
         }
     }

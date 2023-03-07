@@ -41,7 +41,7 @@ impl Tool {
             },
         };
 
-        Tool { action, id: id.to_string() }
+        Tool { action, id: id.into() }
     }
 
     pub fn is_async(&self) -> bool

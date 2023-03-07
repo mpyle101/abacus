@@ -35,10 +35,10 @@ impl From<&Join<'_>> for JoinConfig {
         };
 
         let left_cols = config.lt.iter()
-            .map(|c| c.to_string())
+            .map(|&c| c.into())
             .collect();
         let right_cols = config.rt.iter()
-            .map(|c| c.to_string())
+            .map(|&c| c.into())
             .collect();
         
         JoinConfig { join_type, left_cols, right_cols }
@@ -54,10 +54,10 @@ impl From<&Select<'_>> for SelectConfig {
     fn from(config: &Select) -> SelectConfig
     {
         let aliases = config.aliases.iter()
-            .map(|(k, v)| (k.to_string(), v.to_string()))
+            .map(|(&k, &v)| (k.into(), v.into()))
             .collect();
         let columns = config.columns.iter()
-            .map(|c| c.to_string())
+            .map(|&c| c.into())
             .collect();
 
         SelectConfig { aliases, columns }

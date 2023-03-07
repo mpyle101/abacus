@@ -10,7 +10,7 @@ pub struct SqlConfig {
 impl From<&Sql<'_>> for SqlConfig {
     fn from(sql: &Sql) -> SqlConfig
     {
-        SqlConfig { stmt: sql.stmt.to_string(), table: sql.table.to_string() }
+        SqlConfig { stmt: sql.stmt.to_string(), table: sql.table.into() }
     }
 }
 
@@ -37,7 +37,7 @@ impl From<&ImportCsv<'_>> for CsvImportConfig {
 
         CsvImportConfig {
             fields,
-            path: config.path.to_string(),
+            path: config.path.into(),
             sql: config.sql.as_ref().map(|conf| conf.into()),
             limit: config.limit,
             header: config.header.unwrap_or(false), 
@@ -56,7 +56,7 @@ impl From<&ImportAvro<'_>> for AvroImportConfig {
     fn from(config: &ImportAvro) -> AvroImportConfig
     {
         AvroImportConfig {
-            path: config.path.to_string(),
+            path: config.path.into(),
             sql: config.sql.as_ref().map(|conf| conf.into()),
             limit: config.limit
         }
@@ -73,7 +73,7 @@ impl From<&ImportParquet<'_>> for ParquetImportConfig {
     fn from(config: &ImportParquet) -> ParquetImportConfig
     {
         ParquetImportConfig {
-            path: config.path.to_string(),
+            path: config.path.into(),
             sql: config.sql.as_ref().map(|conf| conf.into()),
             limit: config.limit
         }

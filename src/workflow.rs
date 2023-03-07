@@ -49,8 +49,8 @@ impl Workflow {
             });
 
         Workflow { 
-            id: plan.id.to_string(),
-            name: plan.name.to_string(),
+            id: plan.id.into(),
+            name: plan.name.into(),
             tools,
             inputs,
         }
