@@ -1,10 +1,16 @@
+use std::ffi::OsStr;
 use std::fs;
+use std::path::Path;
+use std::sync::Arc;
 
+use datafusion::arrow::csv::Writer as CsvWriter;
 use datafusion::arrow::datatypes::Schema;
+use datafusion::arrow::json::LineDelimitedWriter as JsonWriter;
 use datafusion::error::Result;
 use datafusion::execution::context::SessionContext;
 use datafusion::execution::options::{AvroReadOptions, CsvReadOptions, ParquetReadOptions};
 use datafusion::prelude::{col, DataFrame};
+use datafusion::parquet::arrow::ArrowWriter;
 
 use crate::config::*;
 use crate::plans::InputSide;
@@ -77,11 +83,24 @@ pub async fn write_csv(
     config: &CsvExportConfig
 ) -> Result<Option<DataFrame>>
 {
-    if config.overwrite {
-        let _ = fs::remove_dir_all(&config.path);
+    let df = data.left.take().unwrap();
+
+    let path = Path::new(&config.path);
+    if let Some("csv") = path.extension().and_then(OsStr::to_str) {
+        if config.overwrite {
+            let _ = fs::remove_file(path);
+        }
+        let file = fs::File::create(path)?;
+        let mut writer = CsvWriter::new(file);
+        let batches = df.collect().await?;
+        batches.iter().for_each(|batch| { writer.write(batch).unwrap(); });
+    } else {
+        if config.overwrite {
+            let _ = fs::remove_dir_all(path);
+        }
+        let plan = df.create_physical_plan().await?;
+        ctx.write_csv(plan, &config.path).await?;
     }
-    let plan = data.left.take().unwrap().create_physical_plan().await?;
-    ctx.write_csv(plan, &config.path).await?;
 
     Ok(None)
 }
@@ -92,11 +111,25 @@ pub async fn write_json(
     config: &JsonExportConfig
 ) -> Result<Option<DataFrame>>
 {
-    if config.overwrite {
-        let _ = fs::remove_dir_all(&config.path);
+    let df = data.left.take().unwrap();
+
+    let path = Path::new(&config.path);
+    if let Some("json") = path.extension().and_then(OsStr::to_str) {
+        if config.overwrite {
+            let _ = fs::remove_file(path);
+        }
+        let file = fs::File::create(path)?;
+        let mut writer = JsonWriter::new(file);
+        let batches = df.collect().await?;
+        writer.write_batches(&batches)?;
+        writer.finish()?;
+    } else {
+        if config.overwrite {
+            let _ = fs::remove_dir_all(path);
+        }
+        let plan = df.create_physical_plan().await?;
+        ctx.write_json(plan, &config.path).await?;
     }
-    let plan = data.left.take().unwrap().create_physical_plan().await?;
-    ctx.write_json(plan, &config.path).await?;
 
     Ok(None)
 }
@@ -107,11 +140,27 @@ pub async fn write_parquet(
     config: &ParquetExportConfig
 ) -> Result<Option<DataFrame>>
 {
-    if config.overwrite {
-        let _ = fs::remove_dir_all(&config.path);
+    let df = data.left.take().unwrap();
+
+    let path = Path::new(&config.path);
+    if let Some("parquet") = path.extension().and_then(OsStr::to_str) {
+        if config.overwrite {
+            let _ = fs::remove_file(path);
+        }
+        let file   = fs::File::create(path)?;
+        let schema = df.schema().try_into().unwrap(); // can never fail
+        let mut writer = ArrowWriter::try_new(file, Arc::new(schema), None)?;
+        let batches = df.collect().await?;
+        batches.iter().for_each(|batch| { writer.write(batch).unwrap(); });
+        writer.close()?;
+
+    } else {
+        if config.overwrite {
+            let _ = fs::remove_dir_all(path);
+        }
+        let plan = df.create_physical_plan().await?;
+        ctx.write_parquet(plan, &config.path, None).await?;
     }
-    let plan = data.left.take().unwrap().create_physical_plan().await?;
-    ctx.write_parquet(plan, &config.path, None).await?;
 
     Ok(None)
 }

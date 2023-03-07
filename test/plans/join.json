@@ -41,11 +41,11 @@
             "aliases": {"Car": "Car(R)"}
         },
         { "id": "05", "tool": "join", "type": "inner", "lt": ["Car(L)"], "rt": ["Car(R)"] },
-        { "id": "06", "tool": "export", "format": "csv", "path": "./output/select", "overwrite": true },
+        { "id": "06", "tool": "export", "format": "csv", "path": "./output/select.csv", "overwrite": true },
 
         { "id": "07", "tool": "union", "distinct": true },
-        { "id": "08", "tool": "export", "format": "json", "path": "./output/union", "overwrite": true },
-        { "id": "09", "tool": "export", "format": "json", "path": "./output/limit", "overwrite": true },
+        { "id": "08", "tool": "export", "format": "parquet", "path": "./output/union.parquet", "overwrite": true },
+        { "id": "09", "tool": "export", "format": "json", "path": "./output/limit.json", "overwrite": true },
 
         {
             "id": "10",
@@ -58,7 +58,7 @@
                 "table": "cars"
             }
         },
-        { "id": "11", "tool": "export", "format": "csv", "path": "./output/sql", "overwrite": true },
+        { "id": "11", "tool": "export", "format": "csv", "path": "./output/sql.csv", "overwrite": true },
         {
             "id": "12",
             "tool": "import",
@@ -70,7 +70,7 @@
             {"lte":[{"col": "Horsepower"}, {"f32": 200.0}]},
             {"gt":[{"col": "Displacement"}, {"f32": 390.0}]}
         ]}},
-        { "id": "14", "tool": "export", "format": "csv", "path": "./output/filter", "overwrite": true }
+        { "id": "14", "tool": "export", "format": "csv", "path": "./output/filter.csv", "overwrite": true }
     ],
     "links": [
         { "src": "01", "dst": "03" },
