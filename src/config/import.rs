@@ -1,6 +1,8 @@
 use std::convert::From;
-use crate::plans::{ImportAvro, ImportCsv, ImportParquet, Sql};
+
 use datafusion::arrow::datatypes::Field;
+
+use crate::plans::{ImportAvro, ImportCsv, ImportParquet, Sql};
 
 #[derive(Clone, Debug)]
 pub struct SqlConfig {
@@ -16,7 +18,7 @@ impl From<&Sql<'_>> for SqlConfig {
 
 #[derive(Clone, Debug)]
 pub struct CsvImportConfig {
-    pub path: String,
+    pub url: url::Url,
     pub header: bool,
     pub delimiter: u8,
     pub sql: Option<SqlConfig>,
@@ -37,7 +39,7 @@ impl From<&ImportCsv<'_>> for CsvImportConfig {
 
         CsvImportConfig {
             fields,
-            path: config.path.into(),
+            url: config.url(),
             sql: config.sql.as_ref().map(|conf| conf.into()),
             limit: config.limit,
             header: config.header.unwrap_or(false), 
@@ -48,15 +50,15 @@ impl From<&ImportCsv<'_>> for CsvImportConfig {
 
 #[derive(Clone, Debug)]
 pub struct AvroImportConfig {
-    pub path: String,
+    pub url: url::Url,
     pub sql: Option<SqlConfig>,
     pub limit: Option<usize>,
 }
 impl From<&ImportAvro<'_>> for AvroImportConfig {
-    fn from(config: &ImportAvro) -> AvroImportConfig
+    fn from(config: &ImportAvro) -> Self
     {
         AvroImportConfig {
-            path: config.path.into(),
+            url: config.url(),
             sql: config.sql.as_ref().map(|conf| conf.into()),
             limit: config.limit
         }
@@ -65,15 +67,15 @@ impl From<&ImportAvro<'_>> for AvroImportConfig {
 
 #[derive(Clone, Debug)]
 pub struct ParquetImportConfig {
-    pub path: String,
+    pub url: url::Url,
     pub sql: Option<SqlConfig>,
     pub limit: Option<usize>,
 }
 impl From<&ImportParquet<'_>> for ParquetImportConfig {
-    fn from(config: &ImportParquet) -> ParquetImportConfig
+    fn from(config: &ImportParquet) -> Self
     {
         ParquetImportConfig {
-            path: config.path.into(),
+            url: config.url(),
             sql: config.sql.as_ref().map(|conf| conf.into()),
             limit: config.limit
         }

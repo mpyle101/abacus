@@ -5,7 +5,7 @@
         {
             "id": "01",
             "tool": "import",
-            "path": "./test/data/csv/cars-with-header.csv",
+            "url": "file:///space/abacus/test/data/csv/cars-with-header.csv",
             "limit": 50,
             "format": "csv",
             "header": true
@@ -13,7 +13,7 @@
         { 
             "id": "02",
             "tool": "import",
-            "path": "./test/data/csv/cars-no-header.csv",
+            "url": "file:///space/abacus/test/data/csv/cars-no-header.csv",
             "format": "csv",
             "header": false,
             "schema": [
@@ -50,8 +50,8 @@
         { 
             "id": "06",
             "tool": "export",
+            "url": "file:///space/abacus/output/select.csv",
             "format": "csv",
-            "path": "./output/select.csv",
             "overwrite": true
         },
         { 
@@ -62,22 +62,22 @@
         { 
             "id": "08",
             "tool": "export",
+            "url": "file:///space/abacus/output/union.parquet",
             "format": "parquet",
-            "path": "./output/union.parquet",
             "compress": "gzip",
             "overwrite": true
         },
         { 
             "id": "09",
             "tool": "export",
+            "url": "file:///space/abacus/output/limit.json",
             "format": "json",
-            "path": "./output/limit.json",
             "overwrite": true
         },
         {
             "id": "10",
             "tool": "import",
-            "path": "./test/data/csv/cars-with-header.csv",
+            "url": "file:///space/abacus/test/data/csv/cars-with-header.csv",
             "format": "csv",
             "header": true,
             "sql": {
@@ -88,14 +88,14 @@
         {
             "id": "11",
             "tool": "export",
+            "url": "file:///space/abacus/output/sql.csv",
             "format": "csv",
-            "path": "./output/sql.csv",
             "overwrite": true
         },
         {
             "id": "12",
             "tool": "import",
-            "path": "./test/data/csv/cars-with-header.csv",
+            "url": "file:///space/abacus/test/data/csv/cars-with-header.csv",
             "format": "csv",
             "header": true
         },
@@ -110,15 +110,15 @@
         {
             "id": "14",
             "tool": "export",
+            "url": "file:///space/abacus/output/filter.csv",
             "format": "csv",
-            "path": "./output/filter.csv",
             "overwrite": true
         },
         {
             "id": "15",
             "tool": "export",
+            "url": "file:///space/abacus/output/union",
             "format": "csv",
-            "path": "./output/union",
             "overwrite": true
         }
     ],

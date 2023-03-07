@@ -43,11 +43,12 @@ pub async fn read_csv(ctx: SessionContext, config: &CsvImportConfig) -> Result<O
         ..Default::default()
     };
 
+    let path = config.url.path();
     let df = if let Some(sql) = &config.sql {
-        ctx.register_csv(&sql.table, &config.path, options).await?;
+        ctx.register_csv(&sql.table, path, options).await?;
         ctx.sql(&sql.stmt).await?
     } else {
-        ctx.read_csv(&config.path, options).await?
+        ctx.read_csv(path, options).await?
     };
     
     Ok(Some(df.limit(0, config.limit)?))
@@ -55,12 +56,13 @@ pub async fn read_csv(ctx: SessionContext, config: &CsvImportConfig) -> Result<O
 
 pub async fn read_avro(ctx: SessionContext, config: &AvroImportConfig) -> Result<Option<DataFrame>>
 {
+    let path = config.url.path();
     let options = AvroReadOptions::default();
     let df = if let Some(sql) = &config.sql {
-        ctx.register_avro(&sql.table, &config.path, options).await?;
+        ctx.register_avro(&sql.table, path, options).await?;
         ctx.sql(&sql.stmt).await?
     } else {
-        ctx.read_avro(&config.path, options).await?
+        ctx.read_avro(path, options).await?
     };
 
     Ok(Some(df.limit(0, config.limit)?))
@@ -68,12 +70,13 @@ pub async fn read_avro(ctx: SessionContext, config: &AvroImportConfig) -> Result
 
 pub async fn read_parquet(ctx: SessionContext, config: &ParquetImportConfig) -> Result<Option<DataFrame>>
 {
+    let path = config.url.path();
     let options = ParquetReadOptions::default();
     let df = if let Some(sql) = &config.sql {
-        ctx.register_parquet(&sql.table, &config.path, options).await?;
+        ctx.register_parquet(&sql.table, path, options).await?;
         ctx.sql(&sql.stmt).await?
     } else {
-        ctx.read_parquet(&config.path, options).await?
+        ctx.read_parquet(path, options).await?
     };
     Ok(Some(df.limit(0, config.limit)?))
 }
@@ -85,7 +88,7 @@ pub async fn write_csv(
 {
     let df = data.left.take().unwrap();
 
-    let path = Path::new(&config.path);
+    let path = Path::new(config.url.path());
     if let Some("csv") = path.extension().and_then(OsStr::to_str) {
         if config.overwrite {
             let _ = fs::remove_file(path);
@@ -98,7 +101,7 @@ pub async fn write_csv(
         if config.overwrite {
             let _ = fs::remove_dir_all(path);
         }
-        df.write_csv(&config.path).await?;
+        df.write_csv(path.to_str().unwrap()).await?;
     }
 
     Ok(None)
@@ -111,7 +114,7 @@ pub async fn write_json(
 {
     let df = data.left.take().unwrap();
 
-    let path = Path::new(&config.path);
+    let path = Path::new(config.url.path());
     if let Some("json") = path.extension().and_then(OsStr::to_str) {
         if config.overwrite {
             let _ = fs::remove_file(path);
@@ -125,7 +128,7 @@ pub async fn write_json(
         if config.overwrite {
             let _ = fs::remove_dir_all(path);
         }
-        df.write_json(&config.path).await?;
+        df.write_json(path.to_str().unwrap()).await?;
     }
 
     Ok(None)
@@ -141,7 +144,7 @@ pub async fn write_parquet(
             .set_compression(config.compress)
             .build());
 
-    let path = Path::new(&config.path);
+    let path = Path::new(config.url.path());
     if let Some("parquet") = path.extension().and_then(OsStr::to_str) {
         if config.overwrite {
             let _ = fs::remove_file(path);
@@ -156,7 +159,7 @@ pub async fn write_parquet(
         if config.overwrite {
             let _ = fs::remove_dir_all(path);
         }
-        df.write_parquet(&config.path, props).await?;
+        df.write_parquet(path.to_str().unwrap(), props).await?;
     }
 
     Ok(None)
