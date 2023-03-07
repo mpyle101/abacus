@@ -132,9 +132,9 @@ impl Action {
             ImportCsv(config)     => read_csv(ctx, config).await,
             ImportAvro(config)    => read_avro(ctx, config).await,
             ImportParquet(config) => read_parquet(ctx, config).await,
-            ExportCsv(config)     => write_csv(&mut data, ctx, config).await,
-            ExportJson(config)    => write_json(&mut data, ctx, config).await,
-            ExportParquet(config) => write_parquet(&mut data, ctx, config).await,
+            ExportCsv(config)     => write_csv(&mut data, config).await,
+            ExportJson(config)    => write_json(&mut data, config).await,
+            ExportParquet(config) => write_parquet(&mut data, config).await,
             _ => panic!("Sync tool running async")
         }
     }

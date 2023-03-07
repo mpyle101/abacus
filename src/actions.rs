@@ -11,6 +11,7 @@ use datafusion::execution::context::SessionContext;
 use datafusion::execution::options::{AvroReadOptions, CsvReadOptions, ParquetReadOptions};
 use datafusion::prelude::{col, DataFrame};
 use datafusion::parquet::arrow::ArrowWriter;
+use datafusion::parquet::file::properties::WriterProperties;
 
 use crate::config::*;
 use crate::plans::InputSide;
@@ -79,7 +80,6 @@ pub async fn read_parquet(ctx: SessionContext, config: &ParquetImportConfig) -> 
 
 pub async fn write_csv(
     data: &mut Data,
-    ctx: SessionContext,
     config: &CsvExportConfig
 ) -> Result<Option<DataFrame>>
 {
@@ -98,8 +98,7 @@ pub async fn write_csv(
         if config.overwrite {
             let _ = fs::remove_dir_all(path);
         }
-        let plan = df.create_physical_plan().await?;
-        ctx.write_csv(plan, &config.path).await?;
+        df.write_csv(&config.path).await?;
     }
 
     Ok(None)
@@ -107,7 +106,6 @@ pub async fn write_csv(
 
 pub async fn write_json(
     data: &mut Data,
-    ctx: SessionContext,
     config: &JsonExportConfig
 ) -> Result<Option<DataFrame>>
 {
@@ -127,8 +125,7 @@ pub async fn write_json(
         if config.overwrite {
             let _ = fs::remove_dir_all(path);
         }
-        let plan = df.create_physical_plan().await?;
-        ctx.write_json(plan, &config.path).await?;
+        df.write_json(&config.path).await?;
     }
 
     Ok(None)
@@ -136,11 +133,13 @@ pub async fn write_json(
 
 pub async fn write_parquet(
     data: &mut Data,
-    ctx: SessionContext,
     config: &ParquetExportConfig
 ) -> Result<Option<DataFrame>>
 {
     let df = data.left.take().unwrap();
+    let props = Some(WriterProperties::builder()
+            .set_compression(config.compress)
+            .build());
 
     let path = Path::new(&config.path);
     if let Some("parquet") = path.extension().and_then(OsStr::to_str) {
@@ -149,17 +148,15 @@ pub async fn write_parquet(
         }
         let file   = fs::File::create(path)?;
         let schema = df.schema().try_into().unwrap(); // can never fail
-        let mut writer = ArrowWriter::try_new(file, Arc::new(schema), None)?;
+        let mut writer = ArrowWriter::try_new(file, Arc::new(schema), props)?;
         let batches = df.collect().await?;
         batches.iter().for_each(|batch| { writer.write(batch).unwrap(); });
         writer.close()?;
-
     } else {
         if config.overwrite {
             let _ = fs::remove_dir_all(path);
         }
-        let plan = df.create_physical_plan().await?;
-        ctx.write_parquet(plan, &config.path, None).await?;
+        df.write_parquet(&config.path, props).await?;
     }
 
     Ok(None)

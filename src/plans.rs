@@ -1,14 +1,34 @@
 use std::borrow::Cow;
 use std::collections::HashMap;
 use datafusion::arrow::datatypes::{DataType, TimeUnit};
+use datafusion::parquet::basic::Compression;
 use serde::Deserialize;
 
-#[derive(Debug, Deserialize)]
-pub struct Plan<'a> {
-    pub id: &'a str,
-    pub name: &'a str,
-    pub links: Vec<Link<'a>>,
-    pub tools: Vec<Tool<'a>>,
+#[derive(Clone, Copy, Debug, Deserialize)]
+#[allow(non_camel_case_types)]
+pub enum ParquetCompression {
+    brotli,
+    gzip,
+    lzo,
+    lz4,
+    lz4_raw,
+    snappy,
+    zstd,
+}
+#[allow(clippy::from_over_into)]
+impl Into<Compression> for ParquetCompression {
+    fn into(self) -> Compression
+    {
+        match self {
+            ParquetCompression::brotli  => Compression::BROTLI,
+            ParquetCompression::gzip    => Compression::GZIP,
+            ParquetCompression::lzo     => Compression::LZO,
+            ParquetCompression::lz4     => Compression::LZ4,
+            ParquetCompression::lz4_raw => Compression::LZ4_RAW,
+            ParquetCompression::zstd    => Compression::ZSTD,
+            ParquetCompression::snappy  => Compression::SNAPPY,
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug, Deserialize)]
@@ -19,6 +39,14 @@ pub enum InputSide {
 }
 impl Default for InputSide {
     fn default() -> Self { InputSide::left }
+}
+
+#[derive(Debug, Deserialize)]
+pub struct Plan<'a> {
+    pub id: &'a str,
+    pub name: &'a str,
+    pub links: Vec<Link<'a>>,
+    pub tools: Vec<Tool<'a>>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -204,6 +232,7 @@ pub struct ExportJson<'a> {
 pub struct ExportParquet<'a> {
     pub id: &'a str,
     pub path: &'a str,
+    pub compress: Option<ParquetCompression>,
     pub overwrite: Option<bool>,
 }
 
@@ -297,6 +326,8 @@ pub enum Expression<'a> {
     add(Box<[Expression<'a>;2]>),
     sub(Box<[Expression<'a>;2]>),
     mul(Box<[Expression<'a>;2]>),
+
+    #[serde(rename(deserialize = "prd"))]
     product(Vec<Expression<'a>>),
 
     #[serde(rename(deserialize = "mod"))]
