@@ -21,14 +21,17 @@ impl Tool {
 
         let id = plan.id();
         let action = match plan {
-            distinct(_)    => Action::Distinct,
-            difference(_)  => Action::Difference,
-            intersect(_)   => Action::Intersect,
-            filter(config) => Action::Filter(config.into()),
-            join(config)   => Action::Join(config.into()),
-            map(config)    => Action::Map(config.into()),
-            select(config) => Action::Select(config.into()),
-            union(config)  => Action::Union(config.into()),
+            difference(_)     => Action::Difference,
+            distinct(_)       => Action::Distinct,
+            intersect(_)      => Action::Intersect,
+            filter(config)    => Action::Filter(config.into()),
+            join(config)      => Action::Join(config.into()),
+            map(config)       => Action::Map(config.into()),
+            select(config)    => Action::Select(config.into()),
+            sort(config)      => Action::Sort(config.into()),
+            summarize(config) => Action::Summarize(config.into()),
+            union(config)     => Action::Union(config.into()),
+
             import(format) => match format {
                 Import::csv(config)     => Action::ImportCsv(config.into()),
                 Import::avro(config)    => Action::ImportAvro(config.into()),
@@ -72,13 +75,15 @@ impl Tool {
 #[derive(Clone, Debug)]
 pub enum Action {
     // Data
-    Distinct,
     Difference,
+    Distinct,
     Intersect,
     Filter(FilterConfig),
     Join(JoinConfig),
     Map(MapConfig),
     Select(SelectConfig),
+    Sort(SortConfig),
+    Summarize(SummarizeConfig),
     Union(UnionConfig),
 
     // Import
@@ -97,7 +102,8 @@ impl Action {
         use Action::*;
 
         match self {
-            Distinct | Filter(_) | Map(_) | Select(_) => 1,
+            Distinct | Filter(_) | Map(_) | Select(_)
+                | Sort(_) | Summarize(_) => 1,
             Difference | Intersect | Join(_) | Union(_) => 2,
             ImportCsv(_) | ImportAvro(_) | ImportParquet(_) => 0,
             ExportCsv(_) | ExportJson(_) | ExportParquet(_) => 1,
@@ -109,9 +115,9 @@ impl Action {
         use Action::*;
 
         match self {
-            Distinct | Difference | Intersect
+            Difference | Distinct | Intersect
                 | Filter(_) | Join(_) | Map(_)
-                | Select(_) | Union(_) => false,
+                | Select(_) | Sort(_) | Summarize(_) | Union(_) => false,
             ImportCsv(_) | ImportAvro(_) | ImportParquet(_) => true,
             ExportCsv(_) | ExportJson(_) | ExportParquet(_) => true
         }
@@ -139,13 +145,16 @@ impl Action {
 
         let mut data = data.unwrap();
         match self {
-            Distinct       => distinct(&mut data),
-            Difference     => difference(&mut data),
-            Intersect      => intersect(&mut data),
-            Filter(config) => filter(&mut data, config),
-            Join(config)   => join(&mut data, config),
-            Select(config) => select(&mut data, config),
-            Union(config)  => union(&mut data, config),
+            Difference        => difference(&mut data),
+            Distinct          => distinct(&mut data),
+            Intersect         => intersect(&mut data),
+            Filter(config)    => filter(&mut data, config),
+            Join(config)      => join(&mut data, config),
+            Map(config)       => map(&mut data, config),
+            Select(config)    => select(&mut data, config),
+            Sort(config)      => sort(&mut data, config),
+            Summarize(config) => summarize(&mut data, config),
+            Union(config)     => union(&mut data, config),
             _ => panic!("Async tool running sync")
         }
     }

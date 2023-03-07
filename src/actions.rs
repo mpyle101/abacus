@@ -161,6 +161,13 @@ pub fn join(data: &mut Data, config: &JoinConfig) -> Result<Option<DataFrame>>
     Ok(Some(frame))
 }
 
+pub fn map(data: &mut Data, config: &MapConfig) -> Result<Option<DataFrame>>
+{
+    let df = data.left.take().unwrap();
+
+    Ok(Some(df.select(config.exprs.clone())?))
+}
+
 pub fn select(data: &mut Data, config: &SelectConfig) -> Result<Option<DataFrame>>
 {
     let df = data.left.take().unwrap();
@@ -174,6 +181,20 @@ pub fn select(data: &mut Data, config: &SelectConfig) -> Result<Option<DataFrame
         .collect::<Vec<_>>();
 
     Ok(Some(df.select(exprs)?))
+}
+
+pub fn sort(data: &mut Data, config: &SortConfig) -> Result<Option<DataFrame>>
+{
+    let df = data.left.take().unwrap();
+
+    Ok(Some(df.sort(config.exprs.clone())?))
+}
+
+pub fn summarize(data: &mut Data, config: &SummarizeConfig) -> Result<Option<DataFrame>>
+{
+    let df = data.left.take().unwrap();
+
+    Ok(Some(df.aggregate(config.group.clone(), config.aggr.clone())?))
 }
 
 pub fn union(data: &mut Data, config: &UnionConfig) -> Result<Option<DataFrame>>

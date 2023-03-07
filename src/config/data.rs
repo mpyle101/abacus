@@ -2,15 +2,7 @@ use std::collections::HashMap;
 use std::convert::From;
 use datafusion::prelude::*;
 
-use crate::plans::{
-    self,
-    Expression,
-    Filter,
-    Join,
-    Map,
-    Select,
-    Union
-};
+use crate::plans::{self, Expression};
 
 #[derive(Clone, Debug)]
 pub struct JoinConfig {
@@ -18,8 +10,8 @@ pub struct JoinConfig {
     pub left_cols: Vec<String>,
     pub right_cols: Vec<String>,
 }
-impl From<&Join<'_>> for JoinConfig {
-    fn from(config: &Join) -> JoinConfig
+impl From<&plans::Join<'_>> for JoinConfig {
+    fn from(config: &plans::Join) -> Self
     {
         use plans::JoinType::*;
 
@@ -41,7 +33,7 @@ impl From<&Join<'_>> for JoinConfig {
             .map(|&c| c.into())
             .collect();
         
-        JoinConfig { join_type, left_cols, right_cols }
+            Self { join_type, left_cols, right_cols }
     }
 }
 
@@ -50,8 +42,8 @@ pub struct SelectConfig {
     pub columns: Vec<String>,
     pub aliases: HashMap<String, String>,
 }
-impl From<&Select<'_>> for SelectConfig {
-    fn from(config: &Select) -> SelectConfig
+impl From<&plans::Select<'_>> for SelectConfig {
+    fn from(config: &plans::Select) -> Self
     {
         let aliases = config.aliases.iter()
             .map(|(&k, &v)| (k.into(), v.into()))
@@ -60,7 +52,7 @@ impl From<&Select<'_>> for SelectConfig {
             .map(|&c| c.into())
             .collect();
 
-        SelectConfig { aliases, columns }
+            Self { aliases, columns }
     }
 }
 
@@ -68,10 +60,10 @@ impl From<&Select<'_>> for SelectConfig {
 pub struct UnionConfig {
     pub distinct: bool,
 }
-impl From<&Union<'_>> for UnionConfig {
-    fn from(config: &Union) -> UnionConfig
+impl From<&plans::Union<'_>> for UnionConfig {
+    fn from(config: &plans::Union) -> Self
     {
-        UnionConfig { distinct: config.distinct.unwrap_or(false) }
+        Self { distinct: config.distinct.unwrap_or(false) }
     }
 }
 
@@ -79,10 +71,10 @@ impl From<&Union<'_>> for UnionConfig {
 pub struct FilterConfig {
     pub expr: Expr,
 }
-impl From<&Filter<'_>> for FilterConfig {
-    fn from(config: &Filter) -> FilterConfig
+impl From<&plans::Filter<'_>> for FilterConfig {
+    fn from(config: &plans::Filter) -> Self
     {
-        FilterConfig { expr: convert(&config.expr) }
+        Self { expr: convert(&config.expr) }
     }
 
 }
@@ -91,10 +83,36 @@ impl From<&Filter<'_>> for FilterConfig {
 pub struct MapConfig {
     pub exprs: Vec<Expr>,
 }
-impl From<&Map<'_>> for MapConfig {
-    fn from(config: &Map) -> MapConfig
+impl From<&plans::Map<'_>> for MapConfig {
+    fn from(config: &plans::Map) -> Self
     {
-        MapConfig { exprs: config.exprs.iter().map(convert).collect() }
+        Self { exprs: config.exprs.iter().map(convert).collect() }
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct SortConfig {
+    pub exprs: Vec<Expr>,
+}
+impl From<&plans::Sort<'_>> for SortConfig {
+    fn from(config: &plans::Sort) -> Self
+    {
+        Self { exprs: config.exprs.iter().map(convert).collect() }
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct SummarizeConfig {
+    pub aggr: Vec<Expr>,
+    pub group: Vec<Expr>,
+}
+impl From<&plans::Summarize<'_>> for SummarizeConfig {
+    fn from(config: &plans::Summarize) -> Self
+    {
+        Self {
+            aggr: config.aggr.iter().map(convert).collect(),
+            group: config.group.iter().map(convert).collect(),
+        }
     }
 }
 

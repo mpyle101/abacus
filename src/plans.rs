@@ -44,6 +44,8 @@ pub enum Tool<'a> {
     join(Join<'a>),
     map(Map<'a>),
     select(Select<'a>),
+    sort(Sort<'a>),
+    summarize(Summarize<'a>),
     union(Union<'a>),
 }
 impl<'a> Tool<'a> {
@@ -61,6 +63,8 @@ impl<'a> Tool<'a> {
             join(tool)       => tool.id,
             map(tool)        => tool.id,
             select(tool)     => tool.id,
+            sort(tool)       => tool.id,
+            summarize(tool)  => tool.id,
             union(tool)      => tool.id,
         }
     }
@@ -235,6 +239,19 @@ pub struct Select<'a> {
 pub struct Map<'a> {
     pub id: &'a str,
     pub exprs: Vec<Expression<'a>>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct Sort<'a> {
+    pub id: &'a str,
+    pub exprs: Vec<Expression<'a>>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct Summarize<'a> {
+    pub id: &'a str,
+    pub aggr: Vec<Expression<'a>>,
+    pub group: Vec<Expression<'a>>,
 }
 
 #[derive(Debug, Deserialize)]
