@@ -31,14 +31,12 @@ impl Into<Compression> for ParquetCompression {
     }
 }
 
-#[derive(Clone, Copy, Debug, Deserialize)]
+#[derive(Clone, Copy, Debug, Default, Deserialize)]
 #[allow(non_camel_case_types)]
 pub enum InputSide {
+    #[default]
     left,
     right,
-}
-impl Default for InputSide {
-    fn default() -> Self { InputSide::left }
 }
 
 #[derive(Debug, Deserialize)]

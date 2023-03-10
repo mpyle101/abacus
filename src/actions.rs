@@ -207,7 +207,7 @@ pub fn join(data: &mut Data, config: &JoinConfig) -> Result<Option<DataFrame>>
     Ok(Some(frame))
 }
 
-pub fn map(data: &mut Data, config: &MapConfig) -> Result<Option<DataFrame>>
+pub fn project(data: &mut Data, config: &MapConfig) -> Result<Option<DataFrame>>
 {
     let df = data.left.take().unwrap();
 

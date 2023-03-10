@@ -150,7 +150,7 @@ impl Action {
             Intersect         => intersect(&mut data),
             Filter(config)    => filter(&mut data, config),
             Join(config)      => join(&mut data, config),
-            Map(config)       => map(&mut data, config),
+            Map(config)       => project(&mut data, config),
             Select(config)    => select(&mut data, config),
             Sort(config)      => sort(&mut data, config),
             Summarize(config) => summarize(&mut data, config),
