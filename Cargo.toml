@@ -9,10 +9,10 @@ description = "Analytic Processor"
 
 [dependencies]
 clap = { version = "4.1.8", features = ["derive"] }
-datafusion = "19.0.0"
+datafusion = "20.0.0"
 petgraph = "0.6.3"
-serde = { version = "1.0.152", features = ["derive"] }
-serde_json = "1.0.93"
+serde = { version = "1.0.156", features = ["derive"] }
+serde_json = "1.0.94"
 tokio = { version = "1.26.0", features = ["full"] }
 
 [profile.release]

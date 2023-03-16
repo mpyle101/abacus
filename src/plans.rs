@@ -325,7 +325,7 @@ pub enum Expression<'a> {
     sub(Box<[Expression<'a>;2]>),
     mul(Box<[Expression<'a>;2]>),
 
-    #[serde(rename(deserialize = "prd"))]
+    #[serde(rename(deserialize = "prod"))]
     product(Vec<Expression<'a>>),
 
     #[serde(rename(deserialize = "mod"))]
