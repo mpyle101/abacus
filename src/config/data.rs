@@ -46,13 +46,13 @@ impl From<&plans::Select<'_>> for SelectConfig {
     fn from(config: &plans::Select) -> Self
     {
         let aliases = config.aliases.iter()
-            .map(|(&k, &v)| (k.into(), v.into()))
+            .map(|(&k, &v)| (format!(r#""{k}""#), v.into()))
             .collect();
         let columns = config.columns.iter()
-            .map(|&c| c.into())
+            .map(|&c| format!(r#""{c}""#))
             .collect();
 
-            Self { aliases, columns }
+        Self { aliases, columns }
     }
 }
 
@@ -119,7 +119,7 @@ impl From<&plans::Summarize<'_>> for SummarizeConfig {
 fn convert(expr: &Expression) -> Expr
 {
     match expr {
-        Expression::col(v)     => col(*v),
+        Expression::col(v)     => col(format!(r#""{v}""#)),
         Expression::f32(v)     => lit(*v),
         Expression::i32(v)     => lit(*v),
         Expression::abs(expr)  => abs(convert(expr)),

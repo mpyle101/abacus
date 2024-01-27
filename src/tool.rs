@@ -11,7 +11,7 @@ pub use crate::actions::Data as ToolData;
 #[derive(Clone, Debug)]
 #[allow(unused)]
 pub struct Tool {
-    id: String,
+    pub id: String,
     action: Action,
 }
 impl Tool {

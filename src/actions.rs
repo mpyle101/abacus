@@ -97,8 +97,10 @@ pub async fn write_csv(
         batches.iter()
             .for_each(|batch| { writer.write(batch).unwrap(); });
     } else {
-        let opts = DataFrameWriteOptions::new()
-            .with_overwrite(config.overwrite);
+        if config.overwrite {
+            let _ = fs::remove_file(path);
+        }
+        let opts = DataFrameWriteOptions::new();
         df.write_csv(&config.path, opts, None).await?;
     }
 

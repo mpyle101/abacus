@@ -75,7 +75,11 @@ impl Workflow {
                     let tool = self.tools[ix].clone();
                     async_tools.spawn(async move { run_async(ix, ctx, tool, data).await });
                 } else {
-                    results.push((ix, self.tools[ix].run_sync(data)?))
+                    let result = self.tools[ix].run_sync(data);
+                    if result.is_err() {
+                        println!("ERROR [{:?}] {:?}", self.tools[ix].id, result);
+                    }
+                    results.push((ix, result?))
                 }
             }
             while let Some(res) = async_tools.join_next().await {
