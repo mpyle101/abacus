@@ -148,7 +148,7 @@ pub async fn write_parquet(
             let _ = fs::remove_file(path);
         }
         let file   = fs::File::create(path)?;
-        let schema = df.schema().try_into().unwrap(); // can never fail
+        let schema = df.schema().into();
         let mut writer = ArrowWriter::try_new(file, Arc::new(schema), props)?;
         let batches = df.collect().await?;
         batches.iter()
