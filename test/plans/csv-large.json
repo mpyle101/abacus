@@ -1,0 +1,37 @@
+{
+    "id": "10",
+    "name": "customers",
+    "tools": [
+        {
+            "id": "01",
+            "tool": "import",
+            "path": "./test/data/csv/customers-large.csv",
+            "format": "csv",
+            "header": true
+        },
+        { 
+            "id": "02",
+            "tool": "filter",
+            "expr": {"eq":[{"col": "Company"}, {"str": "Ochoa PLC"}]}
+
+        },
+        { 
+            "id": "03",
+            "tool": "select",
+            "columns": ["Customer Id", "Company", "First Name", "Last Name", "Country"],
+            "aliases": {}
+        },
+        {
+            "id": "04",
+            "tool": "export",
+            "format": "csv",
+            "path": "./output/customers-large.csv",
+            "overwrite": true
+        }
+    ],
+    "links": [
+        { "src": "01", "dst": "02" },
+        { "src": "02", "dst": "03" },
+        { "src": "03", "dst": "04" }
+    ]
+}
