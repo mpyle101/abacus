@@ -122,6 +122,7 @@ fn convert(expr: &Expression) -> Expr
         Expression::col(v)     => col(format!(r#""{v}""#)),
         Expression::f32(v)     => lit(*v),
         Expression::i32(v)     => lit(*v),
+        Expression::str(v)     => lit(*v),
         Expression::abs(expr)  => abs(convert(expr)),
         Expression::avg(expr)  => avg(convert(expr)),
         Expression::acos(expr) => acos(convert(expr)),
@@ -131,6 +132,11 @@ fn convert(expr: &Expression) -> Expr
         Expression::max(exprs) => max(array(exprs.iter().map(convert).collect())),
         Expression::min(exprs) => min(array(exprs.iter().map(convert).collect())),
         Expression::sum(exprs) => sum(array(exprs.iter().map(convert).collect())),
+        Expression::eq(exprs)  => {
+            let left  = convert(&exprs[0]);
+            let right = convert(&exprs[1]);
+            left.eq(right)
+        },
         Expression::gt(exprs)  => {
             let left  = convert(&exprs[0]);
             let right = convert(&exprs[1]);

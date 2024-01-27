@@ -26,6 +26,8 @@ struct Args {
 #[tokio::main]
 async fn main()
 {
+    use std::time::Instant;
+
     let args = Args::parse();
     let data = fs::read_to_string(args.plan).unwrap();
 
@@ -35,5 +37,7 @@ async fn main()
     let wf = Workflow::new(&plan);
     if args.debug > 1 { println!("{:?}", wf); }
 
-    wf.run(args.debug).await.unwrap()
+    let t = Instant::now();
+    wf.run(args.debug).await.unwrap();
+    println!("Done: {:?}", t.elapsed());
 }
