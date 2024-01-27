@@ -19,13 +19,17 @@ pub enum ParquetCompression {
 impl Into<Compression> for ParquetCompression {
     fn into(self) -> Compression
     {
+        use datafusion::parquet::basic::{BrotliLevel, GzipLevel, ZstdLevel};
+
         match self {
-            ParquetCompression::brotli  => Compression::BROTLI,
-            ParquetCompression::gzip    => Compression::GZIP,
+            ParquetCompression::brotli  => 
+                Compression::BROTLI(BrotliLevel::try_new(4).unwrap()),
+            ParquetCompression::gzip    => Compression::GZIP(GzipLevel::default()),
             ParquetCompression::lzo     => Compression::LZO,
             ParquetCompression::lz4     => Compression::LZ4,
             ParquetCompression::lz4_raw => Compression::LZ4_RAW,
-            ParquetCompression::zstd    => Compression::ZSTD,
+            ParquetCompression::zstd    =>
+                Compression::ZSTD(ZstdLevel::try_new(11).unwrap()),
             ParquetCompression::snappy  => Compression::SNAPPY,
         }
     }

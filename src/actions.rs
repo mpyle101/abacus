@@ -6,6 +6,7 @@ use std::sync::Arc;
 use datafusion::arrow::csv::Writer as CsvWriter;
 use datafusion::arrow::datatypes::Schema;
 use datafusion::arrow::json::LineDelimitedWriter as JsonWriter;
+use datafusion::dataframe::DataFrameWriteOptions;
 use datafusion::error::Result;
 use datafusion::execution::context::SessionContext;
 use datafusion::execution::options::{AvroReadOptions, CsvReadOptions, ParquetReadOptions};
@@ -93,12 +94,12 @@ pub async fn write_csv(
         let file = fs::File::create(path)?;
         let mut writer = CsvWriter::new(file);
         let batches = df.collect().await?;
-        batches.iter().for_each(|batch| { writer.write(batch).unwrap(); });
+        batches.iter()
+            .for_each(|batch| { writer.write(batch).unwrap(); });
     } else {
-        if config.overwrite {
-            let _ = fs::remove_dir_all(path);
-        }
-        df.write_csv(&config.path).await?;
+        let opts = DataFrameWriteOptions::new()
+            .with_overwrite(config.overwrite);
+        df.write_csv(&config.path, opts, None).await?;
     }
 
     Ok(None)
@@ -119,13 +120,13 @@ pub async fn write_json(
         let file = fs::File::create(path)?;
         let mut writer = JsonWriter::new(file);
         let batches = df.collect().await?;
-        writer.write_batches(&batches)?;
+        batches.iter()
+            .for_each(|batch| { writer.write(batch).unwrap(); });
         writer.finish()?;
     } else {
-        if config.overwrite {
-            let _ = fs::remove_dir_all(path);
-        }
-        df.write_json(&config.path).await?;
+        let opts = DataFrameWriteOptions::new()
+            .with_overwrite(config.overwrite);
+        df.write_json(&config.path, opts).await?;
     }
 
     Ok(None)
@@ -150,13 +151,13 @@ pub async fn write_parquet(
         let schema = df.schema().try_into().unwrap(); // can never fail
         let mut writer = ArrowWriter::try_new(file, Arc::new(schema), props)?;
         let batches = df.collect().await?;
-        batches.iter().for_each(|batch| { writer.write(batch).unwrap(); });
+        batches.iter()
+            .for_each(|batch| { writer.write(batch).unwrap(); });
         writer.close()?;
     } else {
-        if config.overwrite {
-            let _ = fs::remove_dir_all(path);
-        }
-        df.write_parquet(&config.path, props).await?;
+        let opts = DataFrameWriteOptions::new()
+            .with_overwrite(config.overwrite);
+        df.write_parquet(&config.path, opts, props).await?;
     }
 
     Ok(None)

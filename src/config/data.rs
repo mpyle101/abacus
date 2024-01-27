@@ -181,7 +181,7 @@ fn convert(expr: &Expression) -> Expr
         Expression::modulus(exprs) => {
             let left  = convert(&exprs[0]);
             let right = convert(&exprs[1]);
-            left.modulus(right)
+            left % right
         },
         Expression::product(exprs) => {
             exprs.iter()
