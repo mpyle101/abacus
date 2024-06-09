@@ -6,6 +6,7 @@ use std::sync::Arc;
 use datafusion::arrow::csv::Writer as CsvWriter;
 use datafusion::arrow::datatypes::Schema;
 use datafusion::arrow::json::LineDelimitedWriter as JsonWriter;
+use datafusion::config::{ParquetOptions, TableParquetOptions};
 use datafusion::dataframe::DataFrameWriteOptions;
 use datafusion::error::Result;
 use datafusion::execution::context::SessionContext;
@@ -128,7 +129,7 @@ pub async fn write_json(
     } else {
         let opts = DataFrameWriteOptions::new()
             .with_overwrite(config.overwrite);
-        df.write_json(&config.path, opts).await?;
+        df.write_json(&config.path, opts, None).await?;
     }
 
     Ok(None)
@@ -140,15 +141,23 @@ pub async fn write_parquet(
 ) -> Result<Option<DataFrame>>
 {
     let df = data.left.take().unwrap();
-    let props = Some(WriterProperties::builder()
-            .set_compression(config.compress)
-            .build());
-
+    let props = Some(
+        TableParquetOptions {
+            global: ParquetOptions {
+                compression: Some(format!("{}", config.compress)),
+                ..Default::default()
+            },
+            ..Default::default()
+        });
+    
     let path = Path::new(&config.path);
     if let Some("parquet") = path.extension().and_then(OsStr::to_str) {
         if config.overwrite {
             let _ = fs::remove_file(path);
         }
+        let props = Some(WriterProperties::builder()
+            .set_compression(config.compress)
+            .build());
         let file   = fs::File::create(path)?;
         let schema = df.schema().into();
         let mut writer = ArrowWriter::try_new(file, Arc::new(schema), props)?;

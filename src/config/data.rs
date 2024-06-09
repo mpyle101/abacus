@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::convert::From;
 use datafusion::prelude::*;
+use datafusion::logical_expr::Operator;
 
 use crate::plans::{self, Expression};
 
@@ -119,82 +120,36 @@ impl From<&plans::Summarize<'_>> for SummarizeConfig {
 fn convert(expr: &Expression) -> Expr
 {
     match expr {
-        Expression::col(v)     => col(format!(r#""{v}""#)),
         Expression::f32(v)     => lit(*v),
+        Expression::f64(v)     => lit(*v),
         Expression::i32(v)     => lit(*v),
+        Expression::i64(v)     => lit(*v),
         Expression::str(v)     => lit(*v),
+        Expression::col(v)     => col(format!(r#""{v}""#)),
         Expression::abs(expr)  => abs(convert(expr)),
-        Expression::avg(expr)  => avg(convert(expr)),
         Expression::acos(expr) => acos(convert(expr)),
         Expression::asin(expr) => atan(convert(expr)),
         Expression::atan(expr) => atan(convert(expr)),
-        Expression::not(expr)  => convert(expr).not(),
-        Expression::max(exprs) => max(array(exprs.iter().map(convert).collect())),
-        Expression::min(exprs) => min(array(exprs.iter().map(convert).collect())),
-        Expression::sum(exprs) => sum(array(exprs.iter().map(convert).collect())),
-        Expression::eq(exprs)  => {
-            let left  = convert(&exprs[0]);
-            let right = convert(&exprs[1]);
-            left.eq(right)
-        },
-        Expression::gt(exprs)  => {
-            let left  = convert(&exprs[0]);
-            let right = convert(&exprs[1]);
-            left.gt(right)
-        },
-        Expression::gte(exprs) => {
-            let left  = convert(&exprs[0]);
-            let right = convert(&exprs[1]);
-            left.gt_eq(right)
-        },
-        Expression::lt(exprs) => {
-            let left  = convert(&exprs[0]);
-            let right = convert(&exprs[1]);
-            left.lt(right)
-        },
-        Expression::lte(exprs) => {
-            let left  = convert(&exprs[0]);
-            let right = convert(&exprs[1]);
-            left.lt_eq(right)
-        },
-        Expression::and(exprs) => {
-            exprs.iter()
-                .map(convert)
-                .reduce(|expr, e| expr.and(e))
-                .unwrap()
-        },
-        Expression::or(exprs) => {
-            exprs.iter()
-                .map(convert)
-                .reduce(|expr, e| expr.or(e))
-                .unwrap()
-        },
-        Expression::add(exprs) => {
-            let left  = convert(&exprs[0]);
-            let right = convert(&exprs[1]);
-            left + right
-        },
-        Expression::sub(exprs) => {
-            let left  = convert(&exprs[0]);
-            let right = convert(&exprs[1]);
-            left - right
-        },
-        Expression::mul(exprs) => {
-            let left  = convert(&exprs[0]);
-            let right = convert(&exprs[1]);
-            left * right
-        },
-        Expression::modulus(exprs) => {
-            let left  = convert(&exprs[0]);
-            let right = convert(&exprs[1]);
-            left % right
-        },
-        Expression::product(exprs) => {
-            exprs.iter()
-                .map(convert)
-                .reduce(|expr, e| expr * e)
-                .unwrap()
-        },
-
+        Expression::not(expr)  => not(convert(expr)),
+        Expression::and(exprs) => exprs.iter().map(convert).reduce(and).unwrap(),
+        Expression::or(exprs)  => exprs.iter().map(convert).reduce(or).unwrap(),
+        Expression::avg(exprs) => avg(make_array(exprs.iter().map(convert).collect())),
+        Expression::min(exprs) => min(make_array(exprs.iter().map(convert).collect())),
+        Expression::max(exprs) => max(make_array(exprs.iter().map(convert).collect())),
+        Expression::sum(exprs) => sum(make_array(exprs.iter().map(convert).collect())),
+        Expression::eq(exprs)  => binary_expr(convert(&exprs[0]), Operator::Eq, convert(&exprs[1])),
+        Expression::ne(exprs)  => binary_expr(convert(&exprs[0]), Operator::NotEq, convert(&exprs[1])),
+        Expression::gt(exprs)  => binary_expr(convert(&exprs[0]), Operator::Gt, convert(&exprs[1])),
+        Expression::gte(exprs) => binary_expr(convert(&exprs[0]), Operator::GtEq, convert(&exprs[1])),
+        Expression::lt(exprs)  => binary_expr(convert(&exprs[0]), Operator::Lt, convert(&exprs[1])),
+        Expression::lte(exprs) => binary_expr(convert(&exprs[0]), Operator::LtEq, convert(&exprs[1])),
+        Expression::add(exprs) => binary_expr(convert(&exprs[0]), Operator::Plus, convert(&exprs[1])),
+        Expression::sub(exprs) => binary_expr(convert(&exprs[0]), Operator::Minus, convert(&exprs[1])),
+        Expression::mul(exprs) => binary_expr(convert(&exprs[0]), Operator::Multiply, convert(&exprs[1])),
+        Expression::div(exprs) => binary_expr(convert(&exprs[0]), Operator::Divide, convert(&exprs[1])),
+        Expression::median(exprs)  => median(make_array(exprs.iter().map(convert).collect())),
+        Expression::stddev(exprs)  => stddev(make_array(exprs.iter().map(convert).collect())),
+        Expression::modulus(exprs) => binary_expr(convert(&exprs[0]), Operator::Modulo, convert(&exprs[1])),
+        Expression::product(exprs) => exprs.iter().map(convert).reduce(|a, b| a * b).unwrap(),
     }
 }
