@@ -154,5 +154,6 @@ fn convert(expr: &Expression) -> Expr
         Expression::modulus(exprs) => binary_expr(convert(&exprs[0]), Operator::Modulo, convert(&exprs[1])),
         Expression::product(exprs) => exprs.iter().map(convert).reduce(|a, b| a * b).unwrap(),
         Expression::cast(expr, dtype) => cast(convert(expr), (*dtype).into()),
+        Expression::sort(expr, asc, nulls_first) => convert(expr).sort(*asc, *nulls_first),
     }
 }

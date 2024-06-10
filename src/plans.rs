@@ -350,4 +350,5 @@ pub enum Expression<'a> {
     modulus(Box<[Expression<'a>;2]>),
 
     cast(Box<Expression<'a>>, SchemaDataType),
+    sort(Box<Expression<'a>>, bool, bool),
 }
