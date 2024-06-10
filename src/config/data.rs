@@ -150,7 +150,6 @@ fn convert(expr: &Expression) -> Expr
         
         Expression::is_true(expr)  => is_true(convert(expr)),
         Expression::is_false(expr) => is_false(convert(expr)),
-        Expression::median(exprs)  => median(make_array(exprs.iter().map(convert).collect())),
         Expression::stddev(exprs)  => stddev(make_array(exprs.iter().map(convert).collect())),
         Expression::modulus(exprs) => binary_expr(convert(&exprs[0]), Operator::Modulo, convert(&exprs[1])),
         Expression::product(exprs) => exprs.iter().map(convert).reduce(|a, b| a * b).unwrap(),

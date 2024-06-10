@@ -334,7 +334,6 @@ pub enum Expression<'a> {
     min(Vec<Expression<'a>>),
     max(Vec<Expression<'a>>),
     sum(Vec<Expression<'a>>),
-    median(Vec<Expression<'a>>),
     stddev(Vec<Expression<'a>>),
 
     #[serde(rename(deserialize = "true"))]

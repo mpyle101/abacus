@@ -9,7 +9,7 @@ description = "Analytic Processor"
 
 [dependencies]
 clap = { version = "4.5.6", features = ["derive"] }
-datafusion = "38.0.0"
+datafusion = "39.0.0"
 petgraph = "0.6.5"
 serde = { version = "1.0.203", features = ["derive"] }
 serde_json = "1.0.117"
