@@ -120,12 +120,12 @@ impl From<&plans::Summarize<'_>> for SummarizeConfig {
 fn convert(expr: &Expression) -> Expr
 {
     match expr {
-        Expression::f32(v)     => lit(*v),
-        Expression::f64(v)     => lit(*v),
-        Expression::i32(v)     => lit(*v),
-        Expression::i64(v)     => lit(*v),
-        Expression::str(v)     => lit(*v),
-        Expression::col(v)     => col(format!(r#""{v}""#)),
+        Expression::f32(v)  => lit(*v),
+        Expression::f64(v)  => lit(*v),
+        Expression::i32(v)  => lit(*v),
+        Expression::i64(v)  => lit(*v),
+        Expression::str(v) => lit(*v),
+        Expression::col(v) => col(format!(r#""{v}""#)),
         Expression::abs(expr)  => abs(convert(expr)),
         Expression::acos(expr) => acos(convert(expr)),
         Expression::asin(expr) => atan(convert(expr)),
@@ -153,5 +153,6 @@ fn convert(expr: &Expression) -> Expr
         Expression::stddev(exprs)  => stddev(make_array(exprs.iter().map(convert).collect())),
         Expression::modulus(exprs) => binary_expr(convert(&exprs[0]), Operator::Modulo, convert(&exprs[1])),
         Expression::product(exprs) => exprs.iter().map(convert).reduce(|a, b| a * b).unwrap(),
+        Expression::cast(expr, dtype) => cast(convert(expr), (*dtype).into()),
     }
 }

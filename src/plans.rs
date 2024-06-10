@@ -126,7 +126,7 @@ pub enum SchemaDataType {
     utf8, bool, null, ts, ms, ns,
     i8, i16, i32, i64,
     u8, u16, u32, u64,
-    f16, f32, f64,
+    f16, f32, f64, date,
 }
 #[allow(clippy::from_over_into)]
 impl Into<DataType> for SchemaDataType {
@@ -150,6 +150,7 @@ impl Into<DataType> for SchemaDataType {
             SchemaDataType::f16  => DataType::Float16,
             SchemaDataType::f32  => DataType::Float32,
             SchemaDataType::f64  => DataType::Float64,
+            SchemaDataType::date => DataType::Date32,
         }
     }
 }
@@ -346,5 +347,7 @@ pub enum Expression<'a> {
     product(Vec<Expression<'a>>),
 
     #[serde(rename(deserialize = "mod"))]
-    modulus(Box<[Expression<'a>;2]>)
+    modulus(Box<[Expression<'a>;2]>),
+
+    cast(Box<Expression<'a>>, SchemaDataType),
 }
