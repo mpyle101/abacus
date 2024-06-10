@@ -337,6 +337,12 @@ pub enum Expression<'a> {
     median(Vec<Expression<'a>>),
     stddev(Vec<Expression<'a>>),
 
+    #[serde(rename(deserialize = "true"))]
+    is_true(Box<Expression<'a>>),
+
+    #[serde(rename(deserialize = "false"))]
+    is_false(Box<Expression<'a>>),
+
     #[serde(rename(deserialize = "prod"))]
     product(Vec<Expression<'a>>),
 
