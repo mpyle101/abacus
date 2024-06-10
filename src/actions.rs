@@ -214,15 +214,10 @@ pub fn join(data: &mut Data, config: &JoinConfig) -> Result<Option<DataFrame>>
 {
     let left  = data.left.take().unwrap();
     let right = data.right.take().unwrap();
-    let lt_cols = config.left_cols.iter()
-        .map(|c| c.as_ref())
-        .collect::<Vec<_>>();
-    let rt_cols = config.right_cols.iter()
-        .map(|c| c.as_ref())
-        .collect::<Vec<_>>();
-    let frame = left.join(right, config.join_type, &lt_cols, &rt_cols, None)?;
+    let exprs = config.left_cols.iter().zip(config.right_cols.iter())
+        .map(|(c1, c2)| col(c1).eq(col(format!(r#""{c2}""#))));
 
-    Ok(Some(frame))
+    Ok(Some(left.join_on(right, config.join_type, exprs)?))
 }
 
 pub fn project(data: &mut Data, config: &MapConfig) -> Result<Option<DataFrame>>
