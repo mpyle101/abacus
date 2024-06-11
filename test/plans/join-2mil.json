@@ -1,0 +1,74 @@
+{
+    "id": "01",
+    "name": "unique",
+    "tools": [
+        {
+            "id": "01",
+            "tool": "import",
+            "path": "./test/data/customers-2mil.parquet",
+            "format": "parquet"
+        },
+        {
+            "id": "02",
+            "tool": "import",
+            "path": "./test/data/name-codes.parquet",
+            "format": "parquet"
+        },
+       {
+            "id": "03",
+            "tool": "join",
+            "type": "inner",
+            "lt": ["First Name"],
+            "rt": ["Name"]
+        },
+        {
+            "id": "04",
+            "tool": "join",
+            "type": "left_anti",
+            "lt": ["First Name"],
+            "rt": ["Name"]
+        },
+        {
+            "id": "05",
+            "tool": "join",
+            "type": "right_anti",
+            "lt": ["First Name"],
+            "rt": ["Name"]
+        },
+        { 
+            "id": "06",
+            "tool": "export",
+            "format": "parquet",
+            "path": "./output/join_a_j.parquet",
+            "overwrite": true,
+            "compress": "snappy"
+        },
+        { 
+            "id": "07",
+            "tool": "export",
+            "format": "parquet",
+            "path": "./output/join_a_l.parquet",
+            "overwrite": true,
+            "compress": "snappy"
+        },
+        { 
+            "id": "08",
+            "tool": "export",
+            "format": "parquet",
+            "path": "./output/join_a_r.parquet",
+            "overwrite": true,
+            "compress": "snappy"
+        }
+     ],
+    "links": [
+        { "src": "01", "dst": "03", "input": "left" },
+        { "src": "02", "dst": "03", "input": "right" },
+        { "src": "01", "dst": "04", "input": "left" },
+        { "src": "02", "dst": "04", "input": "right" },
+        { "src": "01", "dst": "05", "input": "left" },
+        { "src": "02", "dst": "05", "input": "right" },
+        { "src": "03", "dst": "06" },
+        { "src": "04", "dst": "07" },
+        { "src": "05", "dst": "08" }
+    ]
+}

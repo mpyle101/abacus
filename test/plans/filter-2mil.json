@@ -1,0 +1,44 @@
+{
+    "id": "01",
+    "name": "unique",
+    "tools": [
+        {
+            "id": "01",
+            "tool": "import",
+            "path": "./test/data/customers-2mil.parquet",
+            "format": "parquet"
+        },
+        {
+            "id": "02",
+            "tool": "filter",
+            "expr": {"gt":[{"cast":[{"col": "Index"}, "i64"]}, {"i64": 1000000}]}
+        },
+        { 
+            "id": "03",
+            "tool": "export",
+            "format": "parquet",
+            "path": "./output/filter_a_t.parquet",
+            "compress": "snappy",
+            "overwrite": true
+        },
+        {
+            "id": "04",
+            "tool": "filter",
+            "expr": {"lte":[{"cast":[{"col": "Index"}, "i64"]}, {"i64": 1000000}]}
+        },
+        { 
+            "id": "05",
+            "tool": "export",
+            "format": "parquet",
+            "path": "./output/filter_a_f.parquet",
+            "compress": "snappy",
+            "overwrite": true
+        }
+     ],
+    "links": [
+        { "src": "01", "dst": "02" },
+        { "src": "02", "dst": "03" },
+        { "src": "01", "dst": "04" },
+        { "src": "04", "dst": "05" }
+   ]
+}

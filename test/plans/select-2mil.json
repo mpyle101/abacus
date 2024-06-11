@@ -1,0 +1,42 @@
+{
+    "id": "01",
+    "name": "unique",
+    "tools": [
+        {
+            "id": "01",
+            "tool": "import",
+            "path": "./test/data/customers-2mil.parquet",
+            "format": "parquet"
+        },
+        { 
+            "id": "02",
+            "tool": "map",
+            "exprs": [
+                {"cast": [{"col": "Index"}, "i64"]},
+                {"col": "Customer Id"},
+                {"col": "First Name"},
+                {"col": "Last Name"},
+                {"col": "Company"},
+                {"col": "City"},
+                {"col": "Country"},
+                {"col": "Phone 1"},
+                {"col": "Phone 2"},
+                {"col": "Email"},
+                {"cast": [{"col": "Subscription Date"}, "date"]},
+                {"col": "Website"}
+            ]
+        },
+        { 
+            "id": "03",
+            "tool": "export",
+            "format": "parquet",
+            "path": "./output/select_a.parquet",
+            "overwrite": true,
+            "compress": "snappy"
+        }
+     ],
+    "links": [
+        { "src": "01", "dst": "02" },
+        { "src": "02", "dst": "03" }
+   ]
+}

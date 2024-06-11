@@ -1,0 +1,29 @@
+{
+    "id": "01",
+    "name": "unique",
+    "tools": [
+        {
+            "id": "01",
+            "tool": "import",
+            "path": "./test/data/customers-2mil.parquet",
+            "format": "parquet"
+        },
+        { 
+            "id": "02",
+            "tool": "sort",
+            "exprs": [{"sort": [{ "col": "Country" }, true, false]}]
+        },
+        { 
+            "id": "03",
+            "tool": "export",
+            "format": "parquet",
+            "path": "./output/sort_a.parquet",
+            "overwrite": true,
+            "compress": "snappy"
+        }
+     ],
+    "links": [
+        { "src": "01", "dst": "02" },
+        { "src": "02", "dst": "03" }
+   ]
+}
