@@ -258,13 +258,13 @@ pub fn summarize(data: &mut Data, config: &SummarizeConfig) -> Result<Option<Dat
 
 pub fn union(data: &mut Data, config: &UnionConfig) -> Result<Option<DataFrame>>
 {
-    let df = data.left.take().unwrap();
-    let other = data.right.take().unwrap();
-    let frame = if config.distinct {
-        df.union_distinct(other)?
+    let left = data.left.take().unwrap();
+    let right = data.right.take().unwrap();
+    let df = if config.distinct {
+        left.union_distinct(right)?
     } else {
-        df.union(other)?
+        left.union(right)?
     };
 
-    Ok(Some(frame))
+    Ok(Some(df))
 }
