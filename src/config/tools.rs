@@ -2,7 +2,8 @@ use std::collections::HashMap;
 use std::convert::From;
 use datafusion::prelude::{Expr, JoinType};
 
-use crate::plans::{self, convert};
+use crate::plans;
+use crate::expr::convert;
 
 #[derive(Clone, Debug)]
 pub struct JoinConfig {

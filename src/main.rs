@@ -1,5 +1,6 @@
 mod actions;
 mod config;
+mod expr;
 mod plans;
 mod tool;
 mod workflow;
