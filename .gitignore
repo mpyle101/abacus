@@ -4,3 +4,4 @@
 
 # large test file we don't want to upload
 /test/data/csv/customers-large.csv
+/test/data/customers-2mil.parquet
