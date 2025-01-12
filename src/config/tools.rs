@@ -7,6 +7,18 @@ use crate::plans;
 use crate::expr::convert;
 
 #[derive(Clone, Debug)]
+pub struct FilterConfig {
+    pub expr: Expr,
+}
+impl From<&plans::Filter<'_>> for FilterConfig {
+    fn from(config: &plans::Filter) -> Self
+    {
+        Self { expr: convert(&config.expr) }
+    }
+
+}
+
+#[derive(Clone, Debug)]
 pub struct JoinConfig {
     pub join_type: JoinType,
     pub left_cols: Vec<String>,
@@ -35,7 +47,18 @@ impl From<&plans::Join<'_>> for JoinConfig {
             .map(|&c| c.into())
             .collect();
         
-            Self { join_type, left_cols, right_cols }
+        Self { join_type, left_cols, right_cols }
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct MapConfig {
+    pub exprs: Vec<Expr>,
+}
+impl From<&plans::Map<'_>> for MapConfig {
+    fn from(config: &plans::Map) -> Self
+    {
+        Self { exprs: config.exprs.iter().map(convert).collect() }
     }
 }
 
@@ -59,56 +82,22 @@ impl From<&plans::Select<'_>> for SelectConfig {
 }
 
 #[derive(Clone, Debug)]
-pub struct UnionConfig {
-    pub distinct: bool,
-}
-impl From<&plans::Union<'_>> for UnionConfig {
-    fn from(config: &plans::Union) -> Self
-    {
-        Self { distinct: config.distinct.unwrap_or(false) }
-    }
-}
-
-#[derive(Clone, Debug)]
-pub struct FilterConfig {
-    pub expr: Expr,
-}
-impl From<&plans::Filter<'_>> for FilterConfig {
-    fn from(config: &plans::Filter) -> Self
-    {
-        Self { expr: convert(&config.expr) }
-    }
-
-}
-
-#[derive(Clone, Debug)]
-pub struct MapConfig {
-    pub exprs: Vec<Expr>,
-}
-impl From<&plans::Map<'_>> for MapConfig {
-    fn from(config: &plans::Map) -> Self
-    {
-        Self { exprs: config.exprs.iter().map(convert).collect() }
-    }
-}
-
-#[derive(Clone, Debug)]
 pub struct SortConfig {
     pub exprs: Vec<SortExpr>,
 }
 impl From<&plans::Sort<'_>> for SortConfig {
     fn from(config: &plans::Sort) -> Self
     {
-        Self { 
-            exprs: config.exprs.iter()
-                .map(|se| {
-                    let asc  = se.asc.unwrap_or(true);
-                    let expr = convert(&se.expr);
-                    let nulls_first = se.nulls_first.unwrap_or(false);
-                    SortExpr::new(expr, asc, nulls_first)
-                })
-                .collect(),
-        }
+        let exprs = config.exprs.iter()
+            .map(|se| {
+                let asc  = se.asc.unwrap_or(true);
+                let expr = convert(&se.expr);
+                let nulls_first = se.nulls_first.unwrap_or(false);
+                SortExpr::new(expr, asc, nulls_first)
+            })
+            .collect();
+
+        Self { exprs }
     }
 }
 
@@ -124,5 +113,16 @@ impl From<&plans::Summarize<'_>> for SummarizeConfig {
             aggr: config.aggr.iter().map(convert).collect(),
             group: config.group.iter().map(convert).collect(),
         }
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct UnionConfig {
+    pub distinct: bool,
+}
+impl From<&plans::Union<'_>> for UnionConfig {
+    fn from(config: &plans::Union) -> Self
+    {
+        Self { distinct: config.distinct.unwrap_or(false) }
     }
 }
