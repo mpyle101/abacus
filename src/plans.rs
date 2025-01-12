@@ -263,6 +263,12 @@ pub struct Join<'a> {
 }
 
 #[derive(Debug, Deserialize)]
+pub struct Map<'a> {
+    pub id: &'a str,
+    pub exprs: Vec<Expression<'a>>,
+}
+
+#[derive(Debug, Deserialize)]
 pub struct Select<'a> {
     pub id: &'a str,
     pub columns: Vec<&'a str>,
@@ -270,15 +276,9 @@ pub struct Select<'a> {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct Map<'a> {
-    pub id: &'a str,
-    pub exprs: Vec<Expression<'a>>,
-}
-
-#[derive(Debug, Deserialize)]
 pub struct Sort<'a> {
     pub id: &'a str,
-    pub exprs: Vec<Expression<'a>>,
+    pub exprs: Vec<SortExpression<'a>>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -292,6 +292,15 @@ pub struct Summarize<'a> {
 pub struct Union<'a> {
     pub id: &'a str,
     pub distinct: Option<bool>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct SortExpression<'a> {
+    pub asc: Option<bool>,
+    pub nulls_first: Option<bool>,
+
+    #[serde(borrow)]
+    pub expr: Expression<'a>,
 }
 
 #[derive(Debug, Deserialize)]

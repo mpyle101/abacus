@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::convert::From;
 use datafusion::prelude::{Expr, JoinType};
+use datafusion::logical_expr::SortExpr;
 
 use crate::plans;
 use crate::expr::convert;
@@ -93,12 +94,21 @@ impl From<&plans::Map<'_>> for MapConfig {
 
 #[derive(Clone, Debug)]
 pub struct SortConfig {
-    pub exprs: Vec<Expr>,
+    pub exprs: Vec<SortExpr>,
 }
 impl From<&plans::Sort<'_>> for SortConfig {
     fn from(config: &plans::Sort) -> Self
     {
-        Self { exprs: config.exprs.iter().map(convert).collect() }
+        Self { 
+            exprs: config.exprs.iter()
+                .map(|se| {
+                    let asc  = se.asc.unwrap_or(true);
+                    let expr = convert(&se.expr);
+                    let nulls_first = se.nulls_first.unwrap_or(false);
+                    SortExpr::new(expr, asc, nulls_first)
+                })
+                .collect(),
+        }
     }
 }
 

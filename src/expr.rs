@@ -1,4 +1,5 @@
 use datafusion::logical_expr::Operator;
+use datafusion::functions_aggregate::expr_fn::{avg, max, min, stddev, sum};
 use datafusion::prelude::*;
 use serde::Deserialize;
 
@@ -49,7 +50,6 @@ pub enum Expression<'a> {
     modulus(Box<[Expression<'a>;2]>),
 
     cast(Box<Expression<'a>>, SchemaDataType),
-    sort(Box<Expression<'a>>, bool, bool),
 }
 
 pub fn convert(expr: &Expression) -> Expr
@@ -89,6 +89,5 @@ pub fn convert(expr: &Expression) -> Expr
         Expression::modulus(exprs) => binary_expr(convert(&exprs[0]), Operator::Modulo, convert(&exprs[1])),
         Expression::product(exprs) => exprs.iter().map(convert).reduce(|a, b| a * b).unwrap(),
         Expression::cast(expr, dtype) => try_cast(convert(expr), (*dtype).into()),
-        Expression::sort(expr, asc, nulls_first) => convert(expr).sort(*asc, *nulls_first),
     }
 }

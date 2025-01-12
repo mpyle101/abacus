@@ -131,8 +131,7 @@ pub async fn write_json(
         writer.finish()?;
         println!("{recs} records written to {:?}", path);
     } else {
-        let opts = DataFrameWriteOptions::new()
-            .with_overwrite(config.overwrite);
+        let opts = DataFrameWriteOptions::new();
         df.write_json(&config.path, opts, None).await?;
     }
 
@@ -172,8 +171,7 @@ pub async fn write_parquet(
         writer.close()?;
         println!("{recs} records written to {:?}", path);
     } else {
-        let opts = DataFrameWriteOptions::new()
-            .with_overwrite(config.overwrite);
+        let opts = DataFrameWriteOptions::new();
         df.write_parquet(&config.path, opts, props).await?;
     }
 
