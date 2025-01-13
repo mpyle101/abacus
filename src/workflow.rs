@@ -5,11 +5,12 @@ use datafusion::dataframe::DataFrame;
 use datafusion::error::Result;
 use datafusion::execution::context::SessionContext;
 
-use petgraph::visit::EdgeRef;
+use petgraph::Direction::Incoming;
 use petgraph::graph::{Graph, NodeIndex};
+use petgraph::visit::EdgeRef;
 use tokio::task::JoinSet;
 
-use crate::plans::{self, InputSide, Plan};
+use crate::plans::{InputSide, Plan};
 use crate::tool::{Tool, ToolData};
 
 type WorkflowGraph = Graph<Tool, InputSide>;
@@ -19,24 +20,18 @@ type WorkflowGraph = Graph<Tool, InputSide>;
 pub struct Workflow {
     id: String,
     name: String,
-    tools: WorkflowGraph,
-    inputs: Vec<NodeIndex>,
+    graph: WorkflowGraph,
 }
 impl Workflow {
     pub fn new(plan: &Plan) -> Workflow
     {
         let count = plan.tools.len();
-        let mut tools  = Graph::<Tool, InputSide>::with_capacity(count, count);
-        let mut inputs = vec![];
+        let mut graph  = Graph::<Tool, InputSide>::with_capacity(count, count);
 
         let nodes = plan.tools.iter()
             .map(|schema| {
                 let tool = Tool::new(schema);
-                let node = tools.add_node(tool);
-                if let plans::Tool::import(..) = schema {
-                    inputs.push(node);
-                }
-
+                let node = graph.add_node(tool);
                 (schema.id(), node)
             })
             .collect::<HashMap<_,_>>();
@@ -45,14 +40,13 @@ impl Workflow {
             .for_each(|link| {
                 let src = nodes.get(&link.src).unwrap();
                 let dst = nodes.get(&link.dst).unwrap();
-                tools.add_edge(*src, *dst, link.input);
+                graph.add_edge(*src, *dst, link.input);
             });
 
         Workflow { 
             id: plan.id.into(),
             name: plan.name.into(),
-            tools,
-            inputs,
+            graph,
         }
     }
 
@@ -61,23 +55,23 @@ impl Workflow {
         use std::collections::VecDeque;
 
         let mut dfs: HashMap<NodeIndex, ToolData> = HashMap::new();
-        let mut ready = VecDeque::from_iter(self.inputs.iter().cloned());
+        let mut ready = VecDeque::from_iter(self.graph.externals(Incoming));
         while !ready.is_empty() {
             let mut results = vec![];
             let mut async_tools = JoinSet::new();
             while let Some(ix) = ready.pop_front() {
                 if debug > 0 {
-                    println!("{:?}", self.tools[ix])
+                    println!("{:?}", self.graph[ix])
                 }
                 let data = dfs.remove(&ix);
-                if self.tools[ix].is_async() {
+                if self.graph[ix].is_async() {
                     let ctx  = SessionContext::new();
-                    let tool = self.tools[ix].clone();
+                    let tool = self.graph[ix].clone();
                     async_tools.spawn(async move { run_async(ix, ctx, tool, data).await });
                 } else {
-                    let result = self.tools[ix].run_sync(data);
+                    let result = self.graph[ix].run_sync(data);
                     if result.is_err() {
-                        println!("ERROR [{:?}] {:?}", self.tools[ix].id, result);
+                        println!("ERROR [{:?}] {:?}", self.graph[ix].id, result);
                     }
                     results.push((ix, result?))
                 }
@@ -88,12 +82,12 @@ impl Workflow {
 
             for (ix, opt) in results {
                 if let Some(df) = opt {
-                    self.tools.edges(ix)
+                    self.graph.edges(ix)
                         .map(|edge| (edge.target(), *edge.weight()))
                         .for_each(|(node, side)| {
                             let data = dfs.entry(node).or_default();
                             data.set(side, df.clone());
-                            if self.tools[node].is_ready(data) {
+                            if self.graph[node].is_ready(data) {
                                 ready.push_back(node)
                             }
                         });
